@@ -165,6 +165,7 @@ export const ModelsExplorerPage: React.FC<ModelsExplorerPageProps> = ({
   className = "",
   defaultFiltersExpanded = false,
 }) => {
+  const [viewMode, setViewMode] = useState<"list" | "grid">("list");
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>(() => {
     if (defaultFiltersExpanded) {
       return Object.fromEntries(Object.keys(FILTER_GROUPS_EXPANDED).map((k) => [k, true]));
@@ -295,19 +296,13 @@ export const ModelsExplorerPage: React.FC<ModelsExplorerPageProps> = ({
         {/* Main Content */}
         <main className="flex-1 p-8 bg-white overflow-y-auto min-h-0">
           <header className="mb-8">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-              <div>
-                <h1 className="text-3xl font-extrabold font-headline text-on-background tracking-tight">
-                  Model Explorer
-                </h1>
-                <p className="text-on-surface-variant mt-1">
-                  Discover and compare the latest AI models across the ecosystem.
-                </p>
-              </div>
-              <button className="bg-gradient-to-r from-primary to-primary-container text-white px-6 py-2.5 rounded-lg font-semibold shadow-sm active:scale-95 transition-all flex items-center gap-2">
-                <span className="material-symbols-outlined text-sm">upload</span>
-                Upload Model
-              </button>
+            <div className="mb-6">
+              <h1 className="text-3xl font-extrabold font-headline text-on-background tracking-tight">
+                Model Explorer
+              </h1>
+              <p className="text-on-surface-variant mt-1">
+                Discover and compare the latest AI models across the ecosystem.
+              </p>
             </div>
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 py-4 border-y border-surface-container">
               <div className="flex items-center gap-4">
@@ -321,10 +316,16 @@ export const ModelsExplorerPage: React.FC<ModelsExplorerPageProps> = ({
                   <span>Sort by Newest</span>
                 </div>
                 <div className="flex bg-surface-container-low p-1 rounded-lg">
-                  <button className="p-1.5 text-primary bg-white shadow-sm rounded-md">
+                  <button
+                    className={`p-1.5 rounded-md transition-all ${viewMode === "list" ? "text-primary bg-white shadow-sm" : "text-on-surface-variant hover:text-on-surface"}`}
+                    onClick={() => setViewMode("list")}
+                  >
                     <span className="material-symbols-outlined text-sm">list</span>
                   </button>
-                  <button className="p-1.5 text-on-surface-variant hover:text-on-surface">
+                  <button
+                    className={`p-1.5 rounded-md transition-all ${viewMode === "grid" ? "text-primary bg-white shadow-sm" : "text-on-surface-variant hover:text-on-surface"}`}
+                    onClick={() => setViewMode("grid")}
+                  >
                     <span className="material-symbols-outlined text-sm">grid_view</span>
                   </button>
                 </div>
@@ -332,53 +333,99 @@ export const ModelsExplorerPage: React.FC<ModelsExplorerPageProps> = ({
             </div>
           </header>
 
-          {/* Table */}
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-separate border-spacing-y-2">
-              <thead className="text-xs font-bold uppercase tracking-widest text-outline">
-                <tr>
-                  <th className="px-4 py-3">Model Name</th>
-                  <th className="px-4 py-3">Weekly Tokens</th>
-                  <th className="px-4 py-3">Input ($/1M)</th>
-                  <th className="px-4 py-3">Output ($/1M)</th>
-                  <th className="px-4 py-3">Context</th>
-                  <th className="px-4 py-3">Released</th>
-                </tr>
-              </thead>
-              <tbody className="text-sm">
-                {MODEL_ROWS.map((model, i) => (
-                  <tr
-                    key={i}
-                    className="group hover:bg-surface-container-low transition-colors cursor-pointer"
-                    onClick={() => navigate(`/models/${model.slug}`)}
-                  >
-                    <td className="px-4 py-4 bg-surface rounded-l-xl">
-                      <div className="flex items-center gap-3">
-                        <div
-                          className={`w-8 h-8 rounded-lg ${model.bgColor} flex items-center justify-center font-bold text-xs ${model.textColor}`}
-                        >
-                          {model.initial}
-                        </div>
-                        <div>
-                          <div className="font-bold text-on-background">{model.name}</div>
-                          <div className="text-[10px] text-outline">{model.tags}</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-4 py-4 bg-surface">
-                      <span className="font-medium">{model.tokens}</span>
-                    </td>
-                    <td className="px-4 py-4 bg-surface font-mono">{model.input}</td>
-                    <td className="px-4 py-4 bg-surface font-mono">{model.output}</td>
-                    <td className="px-4 py-4 bg-surface">{model.context}</td>
-                    <td className="px-4 py-4 bg-surface rounded-r-xl text-on-surface-variant">
-                      {model.released}
-                    </td>
+          {viewMode === "list" ? (
+            /* List View */
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-separate border-spacing-y-2">
+                <thead className="text-xs font-bold uppercase tracking-widest text-outline">
+                  <tr>
+                    <th className="px-4 py-3">Model Name</th>
+                    <th className="px-4 py-3">Weekly Tokens</th>
+                    <th className="px-4 py-3">Input ($/1M)</th>
+                    <th className="px-4 py-3">Output ($/1M)</th>
+                    <th className="px-4 py-3">Context</th>
+                    <th className="px-4 py-3">Released</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="text-sm">
+                  {MODEL_ROWS.map((model, i) => (
+                    <tr
+                      key={i}
+                      className="group hover:bg-surface-container-low transition-colors cursor-pointer"
+                      onClick={() => navigate(`/models/${model.slug}`)}
+                    >
+                      <td className="px-4 py-4 bg-surface rounded-l-xl">
+                        <div className="flex items-center gap-3">
+                          <div
+                            className={`w-8 h-8 rounded-lg ${model.bgColor} flex items-center justify-center font-bold text-xs ${model.textColor}`}
+                          >
+                            {model.initial}
+                          </div>
+                          <div>
+                            <div className="font-bold text-on-background">{model.name}</div>
+                            <div className="text-[10px] text-outline">{model.tags}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-4 py-4 bg-surface">
+                        <span className="font-medium">{model.tokens}</span>
+                      </td>
+                      <td className="px-4 py-4 bg-surface font-mono">{model.input}</td>
+                      <td className="px-4 py-4 bg-surface font-mono">{model.output}</td>
+                      <td className="px-4 py-4 bg-surface">{model.context}</td>
+                      <td className="px-4 py-4 bg-surface rounded-r-xl text-on-surface-variant">
+                        {model.released}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            /* Grid View */
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+              {MODEL_ROWS.map((model, i) => (
+                <div
+                  key={i}
+                  className="bg-surface border border-outline-variant/15 rounded-xl p-5 hover:border-primary/20 hover:shadow-md transition-all cursor-pointer group"
+                  onClick={() => navigate(`/models/${model.slug}`)}
+                >
+                  <div className="flex items-center gap-3 mb-4">
+                    <div
+                      className={`w-10 h-10 rounded-lg ${model.bgColor} flex items-center justify-center font-bold text-sm ${model.textColor}`}
+                    >
+                      {model.initial}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-bold text-on-background truncate group-hover:text-primary transition-colors">{model.name}</div>
+                      <div className="text-[10px] text-outline">{model.tags}</div>
+                    </div>
+                  </div>
+                  <div className="space-y-2.5 mb-4">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-on-surface-variant">Input</span>
+                      <span className="font-mono font-medium">{model.input}/1M</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-on-surface-variant">Output</span>
+                      <span className="font-mono font-medium">{model.output}/1M</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-on-surface-variant">Context</span>
+                      <span className="font-medium">{model.context}</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between pt-3 border-t border-outline-variant/10">
+                    <span className="text-[10px] text-on-surface-variant">{model.released}</span>
+                    <span className="text-xs font-semibold text-primary opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+                      View details
+                      <span className="material-symbols-outlined text-xs">arrow_forward</span>
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
 
           {/* Load More */}
           <div className="mt-12 flex justify-center">
