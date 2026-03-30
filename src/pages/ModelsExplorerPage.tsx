@@ -9,20 +9,6 @@ interface ModelsExplorerPageProps {
   readonly defaultFiltersExpanded?: boolean;
 }
 
-const FILTER_GROUPS_COLLAPSED = [
-  "Input Modalities",
-  "Output Modalities",
-  "Context length",
-  "Prompt pricing",
-  "Series",
-  "Categories",
-  "Supported Parameters",
-  "Distillable",
-  "Zero Data Retention",
-  "Providers",
-  "Model Authors",
-];
-
 const FILTER_GROUPS_EXPANDED: Record<string, { label: string; checked?: boolean }[]> = {
   "Input Modalities": [
     { label: "Text (347)", checked: true },
@@ -179,9 +165,18 @@ export const ModelsExplorerPage: React.FC<ModelsExplorerPageProps> = ({
   className = "",
   defaultFiltersExpanded = false,
 }) => {
-  const [filtersExpanded, setFiltersExpanded] = useState(defaultFiltersExpanded);
+  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>(() => {
+    if (defaultFiltersExpanded) {
+      return Object.fromEntries(Object.keys(FILTER_GROUPS_EXPANDED).map((k) => [k, true]));
+    }
+    return {};
+  });
   const { pathname } = useLocation();
   const navigate = useNavigate();
+
+  const toggleGroup = (name: string) => {
+    setExpandedGroups((prev) => ({ ...prev, [name]: !prev[name] }));
+  };
 
   return (
     <div className={`bg-surface text-on-surface antialiased h-screen flex flex-col overflow-hidden ${className}`}>
@@ -233,82 +228,68 @@ export const ModelsExplorerPage: React.FC<ModelsExplorerPageProps> = ({
             </button>
           </div>
 
-          {filtersExpanded ? (
-            /* Expanded Filters */
-            <div className="space-y-8">
-              {Object.entries(FILTER_GROUPS_EXPANDED).map(([groupName, options]) => (
+          <div className="space-y-2">
+            {Object.entries(FILTER_GROUPS_EXPANDED).map(([groupName, options]) => {
+              const isOpen = !!expandedGroups[groupName];
+              return (
                 <div key={groupName}>
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-4">
-                    {groupName}
-                  </h3>
-                  {groupName === "Context length" ? (
-                    <div className="space-y-3">
-                      <div className="flex justify-between items-center text-xs font-semibold text-primary">
-                        <span>4K</span>
-                        <span>1M</span>
-                      </div>
-                      <input
-                        type="range"
-                        min="4000"
-                        max="1000000"
-                        step="1000"
-                        defaultValue="200000"
-                        className="w-full h-1.5 bg-surface-container-high rounded-lg appearance-none cursor-pointer accent-primary"
-                      />
-                      <div className="text-sm font-medium text-on-surface text-center">
-                        Up to 200K tokens
-                      </div>
-                    </div>
-                  ) : (
-                    <div
-                      className={`space-y-2 ${
-                        ["Series", "Categories", "Providers", "Model Authors"].includes(groupName)
-                          ? "max-h-48 overflow-y-auto pr-2"
-                          : ""
-                      }`}
-                    >
-                      {options.map((opt) => (
-                        <label key={opt.label} className="flex items-center gap-3 cursor-pointer group">
+                  <button
+                    className="flex items-center justify-between w-full text-xs font-bold uppercase tracking-wider text-on-surface-variant hover:text-primary transition-colors py-2"
+                    onClick={() => toggleGroup(groupName)}
+                  >
+                    <span>{groupName}</span>
+                    <span className={`material-symbols-outlined text-sm transition-transform duration-200 ${isOpen ? "rotate-90" : ""}`}>
+                      chevron_right
+                    </span>
+                  </button>
+                  {isOpen && (
+                    <div className="pb-4 pt-1">
+                      {groupName === "Context length" ? (
+                        <div className="space-y-3">
+                          <div className="flex justify-between items-center text-xs font-semibold text-primary">
+                            <span>4K</span>
+                            <span>1M</span>
+                          </div>
                           <input
-                            type="checkbox"
-                            defaultChecked={opt.checked}
-                            className="rounded border-outline-variant text-primary focus:ring-primary h-4 w-4"
+                            type="range"
+                            min="4000"
+                            max="1000000"
+                            step="1000"
+                            defaultValue="200000"
+                            className="w-full h-1.5 bg-surface-container-high rounded-lg appearance-none cursor-pointer accent-primary"
                           />
-                          <span className="text-sm text-on-surface group-hover:text-primary transition-colors">
-                            {opt.label}
-                          </span>
-                        </label>
-                      ))}
+                          <div className="text-sm font-medium text-on-surface text-center">
+                            Up to 200K tokens
+                          </div>
+                        </div>
+                      ) : (
+                        <div
+                          className={`space-y-2 ${
+                            ["Series", "Categories", "Providers", "Model Authors"].includes(groupName)
+                              ? "max-h-48 overflow-y-auto pr-2"
+                              : ""
+                          }`}
+                        >
+                          {options.map((opt) => (
+                            <label key={opt.label} className="flex items-center gap-3 cursor-pointer group">
+                              <input
+                                type="checkbox"
+                                defaultChecked={opt.checked}
+                                className="rounded border-outline-variant text-primary focus:ring-primary h-4 w-4"
+                              />
+                              <span className="text-sm text-on-surface group-hover:text-primary transition-colors">
+                                {opt.label}
+                              </span>
+                            </label>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
-              ))}
-            </div>
-          ) : (
-            /* Collapsed Filters */
-            <div className="space-y-4">
-              {FILTER_GROUPS_COLLAPSED.map((groupName) => (
-                <div key={groupName}>
-                  <button
-                    className="flex items-center justify-between w-full text-xs font-bold uppercase tracking-wider text-on-surface-variant hover:text-primary transition-colors py-1"
-                    onClick={() => setFiltersExpanded(true)}
-                  >
-                    <span>{groupName}</span>
-                    <span className="material-symbols-outlined text-sm">chevron_right</span>
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {filtersExpanded && (
-            <button
-              className="mt-6 text-xs text-primary font-semibold hover:underline"
-              onClick={() => setFiltersExpanded(false)}
-            >
-              Collapse filters
-            </button>
-          )}
+              );
+            })}
+          </div>
         </aside>
 
         {/* Main Content */}
