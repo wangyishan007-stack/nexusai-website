@@ -1,5 +1,6 @@
 import { type ReactNode } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { NAV_LINKS } from "../data/mockData";
 
 interface NavItem {
   readonly icon: string;
@@ -130,9 +131,15 @@ export default function SettingsLayout({ activeTab, children, className }: Setti
               </div>
             </div>
             <nav className="hidden md:flex items-center gap-6 font-body text-sm font-medium">
-              <Link className="text-slate-500 hover:bg-slate-50 px-2 py-1 rounded-lg transition-all" to="/chat">Playground</Link>
-              <Link className="text-slate-500 hover:bg-slate-50 px-2 py-1 rounded-lg transition-all" to="/docs">Docs</Link>
-              <a className="text-slate-500 hover:bg-slate-50 px-2 py-1 rounded-lg transition-all" href="#">Changelog</a>
+              {NAV_LINKS.map((link) => (
+                <Link
+                  key={link.label}
+                  className="text-slate-500 hover:text-slate-900 px-2 py-1 rounded-lg transition-all"
+                  to={link.href}
+                >
+                  {link.label}
+                </Link>
+              ))}
             </nav>
             <div className="flex items-center gap-2">
               <button className="w-8 h-8 flex items-center justify-center text-slate-500 hover:bg-slate-50 rounded-lg transition-all">
