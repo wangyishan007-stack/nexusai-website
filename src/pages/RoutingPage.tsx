@@ -8,10 +8,13 @@ export default function RoutingPage({ className }: RoutingPageProps) {
   return (
     <SettingsLayout activeTab="routing" className={className}>
       <main className="flex-1 p-10 max-w-6xl w-full mx-auto">
-        <div className="mb-12">
-          <h1 className="text-3xl font-extrabold text-on-surface tracking-tight font-headline">
+        <div className="mb-8">
+          <h2 className="text-3xl font-bold font-headline tracking-tight mb-2">
             Routing
-          </h1>
+          </h2>
+          <p className="text-on-surface-variant text-sm">
+            Configure model routing rules, fallbacks, and load balancing strategies.
+          </p>
         </div>
 
         {/* Routing Content Sections */}

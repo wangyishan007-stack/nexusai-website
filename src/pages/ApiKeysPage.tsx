@@ -107,11 +107,9 @@ export default function ApiKeysPage({ className }: ApiKeysPageProps) {
     <SettingsLayout activeTab="api-keys" className={className}>
       <main className="flex-1 p-10 max-w-6xl w-full mx-auto">
         {/* Page Header */}
-        <header className="mb-10">
-          <h1 className="font-headline font-extrabold text-4xl text-on-background tracking-tight mb-2">
-            API Keys
-          </h1>
-          <p className="text-on-surface-variant text-lg leading-relaxed">
+        <header className="mb-8">
+          <h2 className="text-3xl font-bold font-headline tracking-tight mb-2">API Keys</h2>
+          <p className="text-on-surface-variant text-sm">
             Create and manage your API keys for accessing NexusAI.
           </p>
         </header>

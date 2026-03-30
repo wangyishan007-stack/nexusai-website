@@ -21,17 +21,15 @@ const DESTINATIONS = [
 export default function ObservabilityPage({ className }: ObservabilityPageProps) {
   return (
     <SettingsLayout activeTab="observability" className={className}>
-      <div className="p-10 max-w-6xl mx-auto flex-1 overflow-y-auto">
-        <header className="mb-10 flex justify-between items-end">
-          <div>
-            <h1 className="text-[2.5rem] font-extrabold tracking-tight text-on-background leading-tight font-headline">
-              Observability
-            </h1>
-            <p className="text-on-surface-variant mt-2 text-lg max-w-2xl">
-              Integrate with leading performance monitoring and LLM evaluation tools to track every
-              token, latency, and trace in real-time.
-            </p>
-          </div>
+      <div className="flex-1 p-10 max-w-6xl w-full mx-auto overflow-y-auto">
+        <header className="mb-8">
+          <h2 className="text-3xl font-bold font-headline tracking-tight mb-2">
+            Observability
+          </h2>
+          <p className="text-on-surface-variant text-sm">
+            Integrate with leading performance monitoring and LLM evaluation tools to track every
+            token, latency, and trace in real-time.
+          </p>
         </header>
 
         {/* Broadcast Section Card */}

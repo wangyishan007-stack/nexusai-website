@@ -53,7 +53,7 @@ const SCOPE_OPTIONS = [
 export default function ManagementKeysPage() {
   return (
     <SettingsLayout activeTab="management-keys">
-      <div className="p-8 max-w-7xl mx-auto flex-1">
+      <div className="flex-1 p-10 max-w-6xl w-full mx-auto">
         {/* Page Title */}
         <div className="mb-8 flex justify-between items-end">
           <div>

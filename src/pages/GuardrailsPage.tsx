@@ -18,11 +18,9 @@ export default function GuardrailsPage({ className }: GuardrailsPageProps) {
     <SettingsLayout activeTab="guardrails" className={className}>
       <main className="flex-1 p-10 max-w-6xl w-full mx-auto">
         {/* Page Header */}
-        <header className="mb-10">
-          <h1 className="font-headline font-extrabold text-4xl text-on-background tracking-tight mb-2">
-            Guardrails
-          </h1>
-          <p className="text-on-surface-variant text-lg leading-relaxed">
+        <header className="mb-8">
+          <h2 className="text-3xl font-bold font-headline tracking-tight mb-2">Guardrails</h2>
+          <p className="text-on-surface-variant text-sm">
             Manage data consent and set spending limits, model restrictions, and usage policies.
           </p>
         </header>

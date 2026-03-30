@@ -54,13 +54,13 @@ export default function ByokPage({ className }: ByokPageProps) {
     <SettingsLayout activeTab="byok" className={className}>
       <main className="flex-1 p-10 max-w-6xl w-full mx-auto">
         {/* BYOK Header Section */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
           <div className="space-y-1">
-            <h1 className="text-4xl font-extrabold text-on-surface tracking-tight font-headline">
+            <h2 className="text-3xl font-bold font-headline tracking-tight mb-2">
               BYOK
-            </h1>
+            </h2>
             <div className="flex items-center gap-2 text-on-surface-variant">
-              <span className="text-lg">Use your own provider API keys on NexusAI</span>
+              <span className="text-sm">Use your own provider API keys on NexusAI</span>
               <div className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors group">
                 <span className="material-symbols-outlined text-base">info</span>
                 <span className="text-xs font-semibold tracking-wide border-b border-transparent group-hover:border-primary">

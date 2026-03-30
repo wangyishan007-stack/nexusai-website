@@ -27,7 +27,7 @@ const TEAM_MEMBERS = [
 export default function PreferencesPage() {
   return (
     <SettingsLayout activeTab="preferences">
-      <div className="p-8 max-w-7xl mx-auto flex-1">
+      <div className="flex-1 p-10 max-w-6xl w-full mx-auto">
         {/* Page Title */}
         <div className="mb-8">
           <h2 className="text-3xl font-bold font-headline tracking-tight mb-2">Preferences</h2>

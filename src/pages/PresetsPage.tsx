@@ -8,10 +8,13 @@ export default function PresetsPage({ className }: PresetsPageProps) {
   return (
     <SettingsLayout activeTab="presets" className={className}>
       <main className="flex-1 p-10 max-w-6xl w-full mx-auto">
-        <div className="mb-12">
-          <h1 className="text-3xl font-extrabold text-on-surface tracking-tight font-headline">
+        <div className="mb-8">
+          <h2 className="text-3xl font-bold font-headline tracking-tight mb-2">
             Presets
-          </h1>
+          </h2>
+          <p className="text-on-surface-variant text-sm">
+            Create and manage shortcuts for system prompts and request parameters.
+          </p>
         </div>
 
         {/* Content Area: Empty State */}

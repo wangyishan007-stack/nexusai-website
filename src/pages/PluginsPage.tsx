@@ -43,13 +43,13 @@ const PLUGINS = [
 export default function PluginsPage({ className }: PluginsPageProps) {
   return (
     <SettingsLayout activeTab="plugins" className={className}>
-      <div className="flex-1 overflow-y-auto p-8 space-y-8">
+      <div className="flex-1 overflow-y-auto p-10 max-w-6xl w-full mx-auto space-y-8">
         {/* Page Header */}
-        <div className="max-w-4xl">
-          <h2 className="text-3xl font-extrabold font-headline tracking-tight text-on-surface mb-2">
+        <div className="max-w-4xl mb-8">
+          <h2 className="text-3xl font-bold font-headline tracking-tight mb-2">
             Plugins
           </h2>
-          <p className="text-on-surface-variant">
+          <p className="text-on-surface-variant text-sm">
             Extend your LLM capabilities with modular integrations and specialized tools.
           </p>
         </div>
