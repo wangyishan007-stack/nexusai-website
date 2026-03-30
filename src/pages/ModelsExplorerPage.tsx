@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { NAV_LINKS } from "../data/mockData";
 
 /* Navbar import removed – this page uses an inline header for full-viewport containment */
@@ -109,6 +109,7 @@ const FILTER_GROUPS_EXPANDED: Record<string, { label: string; checked?: boolean 
 
 const MODEL_ROWS = [
   {
+    slug: "alibaba-wan-2-6",
     initial: "A",
     bgColor: "bg-surface-container-highest",
     textColor: "text-primary",
@@ -121,6 +122,7 @@ const MODEL_ROWS = [
     released: "Feb 14, 2024",
   },
   {
+    slug: "kwaipilot-kat-coder",
     initial: "K",
     bgColor: "bg-slate-800",
     textColor: "text-white",
@@ -133,6 +135,7 @@ const MODEL_ROWS = [
     released: "Feb 12, 2024",
   },
   {
+    slug: "llama-3-1-405b",
     initial: "M",
     bgColor: "bg-blue-100",
     textColor: "text-blue-700",
@@ -145,6 +148,7 @@ const MODEL_ROWS = [
     released: "Jan 28, 2024",
   },
   {
+    slug: "claude-3-5-sonnet",
     initial: "A",
     bgColor: "bg-orange-100",
     textColor: "text-orange-700",
@@ -157,6 +161,7 @@ const MODEL_ROWS = [
     released: "Jan 15, 2024",
   },
   {
+    slug: "o1-preview",
     initial: "O",
     bgColor: "bg-purple-100",
     textColor: "text-purple-700",
@@ -176,6 +181,7 @@ export const ModelsExplorerPage: React.FC<ModelsExplorerPageProps> = ({
 }) => {
   const [filtersExpanded, setFiltersExpanded] = useState(defaultFiltersExpanded);
   const { pathname } = useLocation();
+  const navigate = useNavigate();
 
   return (
     <div className={`bg-surface text-on-surface antialiased h-screen flex flex-col overflow-hidden ${className}`}>
@@ -363,6 +369,7 @@ export const ModelsExplorerPage: React.FC<ModelsExplorerPageProps> = ({
                   <tr
                     key={i}
                     className="group hover:bg-surface-container-low transition-colors cursor-pointer"
+                    onClick={() => navigate(`/models/${model.slug}`)}
                   >
                     <td className="px-4 py-4 bg-surface rounded-l-xl">
                       <div className="flex items-center gap-3">

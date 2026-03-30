@@ -33,9 +33,10 @@ export const FeaturedModels: React.FC<FeaturedModelsProps> = ({ className = "" }
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {FEATURED_MODELS.map((model) => (
-            <div
+            <Link
               key={model.name}
-              className="ambient-shadow bg-surface border border-outline-variant/15 rounded-2xl overflow-hidden hover:scale-[1.01] transition-transform"
+              to={`/models/${model.slug}`}
+              className="ambient-shadow bg-surface border border-outline-variant/15 rounded-2xl overflow-hidden hover:scale-[1.01] transition-transform block"
             >
               <div className="p-6">
                 <div className="flex justify-between items-start mb-6">
@@ -61,11 +62,11 @@ export const FeaturedModels: React.FC<FeaturedModelsProps> = ({ className = "" }
                     <span className="font-mono font-medium">{model.context}</span>
                   </div>
                 </div>
-                <button className="w-full py-3 rounded-lg bg-surface-container-high text-on-surface font-semibold hover:bg-primary-container hover:text-on-primary transition-all">
+                <span className="block w-full py-3 rounded-lg bg-surface-container-high text-on-surface font-semibold hover:bg-primary-container hover:text-on-primary transition-all text-center">
                   Try Model
-                </button>
+                </span>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </div>

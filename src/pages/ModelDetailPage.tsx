@@ -1,3 +1,4 @@
+import { Link, useParams } from "react-router-dom";
 import { Navbar } from "../components/Navbar";
 import { Footer } from "../components/Footer";
 
@@ -5,7 +6,119 @@ interface ModelDetailPageProps {
   readonly className?: string;
 }
 
-const METRICS = [
+interface ModelData {
+  name: string;
+  provider: string;
+  modelId: string;
+  description: string;
+  metrics: { label: string; value: string; highlight: boolean }[];
+  benchmarks: { name: string; score: string }[];
+  codeExample: string;
+}
+
+const MODEL_DATA: Record<string, ModelData> = {
+  "claude-3-5-sonnet": {
+    name: "Claude 3.5 Sonnet",
+    provider: "Anthropic",
+    modelId: "anthropic/claude-3.5-sonnet",
+    description: "Claude 3.5 Sonnet is Anthropic's most balanced model, excelling at coding, analysis, and complex reasoning tasks. It strikes the perfect equilibrium between intelligence and speed, making it the ideal choice for enterprise-scale deployments.",
+    metrics: [
+      { label: "Created", value: "Jun 20, 2024", highlight: false },
+      { label: "Context", value: "200,000", highlight: false },
+      { label: "Input / 1M", value: "$3.00", highlight: true },
+      { label: "Output / 1M", value: "$15.00", highlight: true },
+      { label: "Max Output", value: "8,192", highlight: false },
+    ],
+    benchmarks: [
+      { name: "MMLU", score: "88.7%" },
+      { name: "HumanEval", score: "92.0%" },
+      { name: "MATH", score: "71.1%" },
+    ],
+    codeExample: `import nexusai
+
+client = nexusai.NexusAI(api_key="YOUR_NEXUS_KEY")
+
+response = client.chat.completions.create(
+    model="anthropic/claude-3.5-sonnet",
+    messages=[
+        {"role": "system", "content": "You are an expert dev."},
+        {"role": "user", "content": "Optimize this React hook."}
+    ],
+    temperature=0.7,
+    max_tokens=4096
+)
+
+print(response.choices[0].message.content)`,
+  },
+  "gpt-4o": {
+    name: "GPT-4o",
+    provider: "OpenAI",
+    modelId: "openai/gpt-4o",
+    description: "GPT-4o is OpenAI's flagship multimodal model. It accepts text, image, and audio inputs and generates text and audio outputs. It's the fastest and most affordable frontier model, with strong performance across vision, audio understanding, and multilingual tasks.",
+    metrics: [
+      { label: "Created", value: "May 13, 2024", highlight: false },
+      { label: "Context", value: "128,000", highlight: false },
+      { label: "Input / 1M", value: "$2.50", highlight: true },
+      { label: "Output / 1M", value: "$10.00", highlight: true },
+      { label: "Max Output", value: "16,384", highlight: false },
+    ],
+    benchmarks: [
+      { name: "MMLU", score: "88.7%" },
+      { name: "HumanEval", score: "90.2%" },
+      { name: "MATH", score: "76.6%" },
+    ],
+    codeExample: `import nexusai
+
+client = nexusai.NexusAI(api_key="YOUR_NEXUS_KEY")
+
+response = client.chat.completions.create(
+    model="openai/gpt-4o",
+    messages=[
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": "Explain quantum computing simply."}
+    ],
+    temperature=0.8,
+    max_tokens=2048
+)
+
+print(response.choices[0].message.content)`,
+  },
+  "deepseek-v3": {
+    name: "DeepSeek V3",
+    provider: "DeepSeek",
+    modelId: "deepseek/deepseek-v3",
+    description: "DeepSeek V3 delivers exceptional value with near-frontier performance at a fraction of the cost. With 671B MoE parameters and 37B active, it excels at coding, math, and multilingual tasks while maintaining remarkably low inference costs.",
+    metrics: [
+      { label: "Created", value: "Dec 26, 2024", highlight: false },
+      { label: "Context", value: "164,000", highlight: false },
+      { label: "Input / 1M", value: "$0.32", highlight: true },
+      { label: "Output / 1M", value: "$1.28", highlight: true },
+      { label: "Max Output", value: "8,192", highlight: false },
+    ],
+    benchmarks: [
+      { name: "MMLU", score: "87.1%" },
+      { name: "HumanEval", score: "82.6%" },
+      { name: "MATH", score: "90.2%" },
+    ],
+    codeExample: `import nexusai
+
+client = nexusai.NexusAI(api_key="YOUR_NEXUS_KEY")
+
+response = client.chat.completions.create(
+    model="deepseek/deepseek-v3",
+    messages=[
+        {"role": "system", "content": "You are a math tutor."},
+        {"role": "user", "content": "Prove the Pythagorean theorem."}
+    ],
+    temperature=0.3,
+    max_tokens=4096
+)
+
+print(response.choices[0].message.content)`,
+  },
+};
+
+const DEFAULT_METRICS = [
   { label: "Created", value: "May 22, 2025", highlight: false },
   { label: "Context", value: "200,000", highlight: false },
   { label: "Input / 1M", value: "$3.00", highlight: true },
@@ -24,7 +137,7 @@ const FEATURES = [
 
 const SUPPORTED_PARAMS = ["temperature", "top_p", "max_tokens", "stop_sequences", "stream", "seed"];
 
-const BENCHMARKS = [
+const DEFAULT_BENCHMARKS = [
   { name: "MMLU", score: "88.7%" },
   { name: "HumanEval", score: "92.3%" },
   { name: "MATH", score: "76.1%" },
@@ -62,23 +175,18 @@ const PROVIDERS = [
 
 const TABS = ["Overview", "API", "Providers", "Benchmarks"];
 
-const CODE_EXAMPLE = `import nexusai
-
-client = nexusai.NexusAI(api_key="YOUR_NEXUS_KEY")
-
-response = client.chat.completions.create(
-    model="anthropic/claude-sonnet-4",
-    messages=[
-        {"role": "system", "content": "You are an expert dev."},
-        {"role": "user", "content": "Optimize this React hook."}
-    ],
-    temperature=0.7,
-    max_tokens=4096
-)
-
-print(response.choices[0].message.content)`;
-
 export const ModelDetailPage: React.FC<ModelDetailPageProps> = ({ className = "" }) => {
+  const { id } = useParams<{ id: string }>();
+  const model = id ? MODEL_DATA[id] : undefined;
+
+  const displayName = model?.name ?? "Claude Sonnet 4";
+  const provider = model?.provider ?? "Anthropic";
+  const modelId = model?.modelId ?? "anthropic/claude-sonnet-4";
+  const description = model?.description ?? "Claude Sonnet 4 is Anthropic's most balanced model, excelling at coding, analysis, and complex reasoning tasks. It strikes the perfect equilibrium between intelligence and speed, making it the ideal choice for enterprise-scale deployments.";
+  const metrics = model?.metrics ?? DEFAULT_METRICS;
+  const benchmarks = model?.benchmarks ?? DEFAULT_BENCHMARKS;
+  const codeExample = model?.codeExample ?? `import nexusai\n\nclient = nexusai.NexusAI(api_key="YOUR_NEXUS_KEY")\n\nresponse = client.chat.completions.create(\n    model="${modelId}",\n    messages=[{"role": "user", "content": "Hello"}]\n)\n\nprint(response.choices[0].message.content)`;
+
   return (
     <div className={`bg-background text-on-background ${className}`}>
       <Navbar />
@@ -86,15 +194,15 @@ export const ModelDetailPage: React.FC<ModelDetailPageProps> = ({ className = ""
       <main className="pt-24 pb-20 px-6 max-w-7xl mx-auto">
         {/* Breadcrumb */}
         <nav className="flex items-center gap-2 mb-8 text-sm text-on-surface-variant font-label">
-          <a className="hover:text-primary transition-colors" href="#">
+          <Link className="hover:text-primary transition-colors" to="/models">
             Models
-          </a>
+          </Link>
           <span className="material-symbols-outlined text-xs">chevron_right</span>
-          <a className="hover:text-primary transition-colors" href="#">
-            Anthropic
-          </a>
+          <span className="hover:text-primary transition-colors cursor-pointer">
+            {provider}
+          </span>
           <span className="material-symbols-outlined text-xs">chevron_right</span>
-          <span className="text-on-surface font-semibold">Claude Sonnet 4</span>
+          <span className="text-on-surface font-semibold">{displayName}</span>
         </nav>
 
         {/* Model Header */}
@@ -110,11 +218,11 @@ export const ModelDetailPage: React.FC<ModelDetailPageProps> = ({ className = ""
             </div>
             <div>
               <h1 className="text-4xl font-extrabold font-headline tracking-tight text-on-background mb-2">
-                Claude Sonnet 4
+                {displayName}
               </h1>
               <div className="flex items-center gap-2 text-on-surface-variant">
                 <code className="px-2 py-1 bg-surface-container rounded text-xs font-mono">
-                  anthropic/claude-sonnet-4
+                  {modelId}
                 </code>
                 <button
                   className="p-1 hover:bg-surface-container-high rounded transition-colors"
@@ -139,7 +247,7 @@ export const ModelDetailPage: React.FC<ModelDetailPageProps> = ({ className = ""
 
         {/* Metrics Bar */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-0.5 bg-outline-variant/20 rounded-xl overflow-hidden mb-12 border border-outline-variant/10">
-          {METRICS.map((metric, i) => (
+          {metrics.map((metric, i) => (
             <div
               key={metric.label}
               className={`bg-surface-container-lowest p-6 flex flex-col gap-1 ${
@@ -164,9 +272,7 @@ export const ModelDetailPage: React.FC<ModelDetailPageProps> = ({ className = ""
           {/* Left Content */}
           <div className="lg:col-span-2">
             <p className="text-lg text-on-surface-variant leading-relaxed mb-10 max-w-2xl">
-              Claude Sonnet 4 is Anthropic's most balanced model, excelling at coding, analysis, and
-              complex reasoning tasks. It strikes the perfect equilibrium between intelligence and
-              speed, making it the ideal choice for enterprise-scale deployments.
+              {description}
             </p>
 
             {/* Tabs */}
@@ -242,7 +348,7 @@ export const ModelDetailPage: React.FC<ModelDetailPageProps> = ({ className = ""
             <div className="p-6 bg-surface-container-lowest rounded-2xl border border-outline-variant/10 shadow-sm">
               <h4 className="font-headline font-bold mb-4">Benchmarks Overview</h4>
               <div className="space-y-4">
-                {BENCHMARKS.map((bench) => (
+                {benchmarks.map((bench) => (
                   <div key={bench.name} className="space-y-1">
                     <div className="flex justify-between text-[10px] font-bold uppercase text-on-surface-variant">
                       <span>{bench.name}</span>
@@ -339,7 +445,7 @@ export const ModelDetailPage: React.FC<ModelDetailPageProps> = ({ className = ""
             </div>
             <div className="p-8 font-mono text-sm leading-relaxed text-blue-200 overflow-x-auto">
               <pre>
-                <code>{CODE_EXAMPLE}</code>
+                <code>{codeExample}</code>
               </pre>
             </div>
           </div>

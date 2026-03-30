@@ -43,6 +43,7 @@ export const VALUE_PROPS = [
 ];
 
 export interface ModelCard {
+  slug: string;
   name: string;
   provider: string;
   badge: string;
@@ -53,6 +54,7 @@ export interface ModelCard {
 
 export const FEATURED_MODELS: ModelCard[] = [
   {
+    slug: "claude-3-5-sonnet",
     name: "Claude 3.5 Sonnet",
     provider: "Anthropic",
     badge: "NEW",
@@ -61,6 +63,7 @@ export const FEATURED_MODELS: ModelCard[] = [
     context: "200K",
   },
   {
+    slug: "gpt-4o",
     name: "GPT-4o",
     provider: "OpenAI",
     badge: "POPULAR",
@@ -69,6 +72,7 @@ export const FEATURED_MODELS: ModelCard[] = [
     context: "128K",
   },
   {
+    slug: "deepseek-v3",
     name: "DeepSeek V3",
     provider: "DeepSeek",
     badge: "VALUE",
