@@ -172,11 +172,29 @@ export const ModelsExplorerPage: React.FC<ModelsExplorerPageProps> = ({
     }
     return {};
   });
+  const [checkedFilters, setCheckedFilters] = useState<Record<string, boolean>>(() => {
+    const initial: Record<string, boolean> = {};
+    for (const [, options] of Object.entries(FILTER_GROUPS_EXPANDED)) {
+      for (const opt of options) {
+        if (opt.checked) initial[opt.label] = true;
+      }
+    }
+    return initial;
+  });
   const { pathname } = useLocation();
   const navigate = useNavigate();
 
   const toggleGroup = (name: string) => {
     setExpandedGroups((prev) => ({ ...prev, [name]: !prev[name] }));
+  };
+
+  const clearAll = () => {
+    setCheckedFilters({});
+    setExpandedGroups({});
+  };
+
+  const toggleCheck = (label: string) => {
+    setCheckedFilters((prev) => ({ ...prev, [label]: !prev[label] }));
   };
 
   return (
@@ -224,7 +242,7 @@ export const ModelsExplorerPage: React.FC<ModelsExplorerPageProps> = ({
         <aside className="w-72 bg-surface-container-low p-6 overflow-y-auto hidden lg:block border-r border-surface-container shrink-0">
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-lg font-bold font-headline">Filters</h2>
-            <button className="text-xs text-primary font-semibold hover:underline">
+            <button className="text-xs text-primary font-semibold hover:underline" onClick={clearAll}>
               Clear all
             </button>
           </div>
@@ -275,7 +293,8 @@ export const ModelsExplorerPage: React.FC<ModelsExplorerPageProps> = ({
                             <label key={opt.label} className="flex items-center gap-3 cursor-pointer group">
                               <input
                                 type="checkbox"
-                                defaultChecked={opt.checked}
+                                checked={!!checkedFilters[opt.label]}
+                                onChange={() => toggleCheck(opt.label)}
                                 className="rounded border-outline-variant text-primary focus:ring-primary h-4 w-4"
                               />
                               <span className="text-sm text-on-surface group-hover:text-primary transition-colors">
