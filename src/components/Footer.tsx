@@ -45,7 +45,7 @@ export const Footer: React.FC<FooterProps> = ({ className = "" }) => {
         ))}
       </div>
       <div className="max-w-7xl mx-auto px-6 pt-8 border-t border-slate-200 flex flex-col md:flex-row justify-between items-center gap-6">
-        <p className="text-sm text-slate-500">&copy; 2024 NexusAI Inc. All rights reserved.</p>
+        <p className="text-sm text-slate-500">&copy; 2026 NexusAI Inc. All rights reserved.</p>
         <div className="flex gap-8">
           <a href="#" className="text-sm text-slate-500 hover:text-blue-500 transition-colors">Privacy Policy</a>
           <a href="#" className="text-sm text-slate-500 hover:text-blue-500 transition-colors">Terms of Service</a>

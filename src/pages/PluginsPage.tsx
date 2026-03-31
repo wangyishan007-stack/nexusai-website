@@ -23,8 +23,8 @@ const PLUGINS = [
     iconBg: "bg-red-50",
     iconColor: "text-red-600",
     status: "Enabled",
-    statusBg: "bg-slate-100",
-    statusColor: "text-slate-600",
+    statusBg: "bg-surface-container",
+    statusColor: "text-on-surface-variant",
     hasToggle: false,
   },
   {
@@ -43,10 +43,10 @@ const PLUGINS = [
 export default function PluginsPage({ className }: PluginsPageProps) {
   return (
     <SettingsLayout activeTab="plugins" className={className}>
-      <div className="flex-1 overflow-y-auto p-10 max-w-6xl w-full mx-auto space-y-8">
+      <div className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-10 max-w-6xl w-full mx-auto space-y-8">
         {/* Page Header */}
         <div className="max-w-4xl mb-8">
-          <h2 className="text-3xl font-bold font-headline tracking-tight mb-2">
+          <h2 className="text-2xl sm:text-3xl font-bold font-headline tracking-tight mb-2">
             Plugins
           </h2>
           <p className="text-on-surface-variant text-sm">
@@ -57,8 +57,8 @@ export default function PluginsPage({ className }: PluginsPageProps) {
         {/* Bento Layout Section */}
         <section className="max-w-4xl space-y-6">
           {/* Section Descriptor Card */}
-          <div className="bg-surface-container-low rounded-xl p-6 flex items-start space-x-4 border border-outline-variant/10">
-            <div className="p-2 bg-primary/10 rounded-lg text-primary">
+          <div className="bg-surface-container-low rounded-xl p-6 flex items-start space-x-4">
+            <div className="p-2 bg-primary/8 rounded-lg text-primary">
               <span className="material-symbols-outlined">info</span>
             </div>
             <div>
@@ -77,7 +77,7 @@ export default function PluginsPage({ className }: PluginsPageProps) {
             {PLUGINS.map((plugin) => (
               <div
                 key={plugin.name}
-                className="group bg-surface-container-lowest hover:bg-surface-container-low transition-all duration-300 p-5 rounded-xl flex items-center justify-between border border-outline-variant/10"
+                className="group bg-surface-container-lowest hover:bg-surface-container-low transition-all duration-300 p-5 rounded-xl flex items-center justify-between"
               >
                 <div className="flex items-center space-x-4">
                   <div
@@ -100,13 +100,13 @@ export default function PluginsPage({ className }: PluginsPageProps) {
                   )}
                   {plugin.hasToggle && (
                     <div className="flex items-center cursor-pointer">
-                      <div className="relative w-11 h-6 bg-slate-200 rounded-full transition-colors">
+                      <div className="relative w-11 h-6 bg-surface-container-highest rounded-full transition-colors">
                         <div className="absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-all" />
                       </div>
-                      <span className="ml-3 text-xs font-medium text-slate-400">OFF</span>
+                      <span className="ml-3 text-xs font-medium text-on-surface-variant">OFF</span>
                     </div>
                   )}
-                  <button className="p-2 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-colors">
+                  <button className="p-2 text-on-surface-variant hover:bg-surface-container rounded-lg transition-colors">
                     <span className="material-symbols-outlined">settings</span>
                   </button>
                 </div>

@@ -105,9 +105,9 @@ export const DocsPage: React.FC<DocsPageProps> = ({ className = "" }) => {
       <Navbar />
 
       {/* App Container */}
-      <div className="flex pt-20 min-h-screen">
+      <div className="flex pt-16 min-h-screen">
         {/* Left Sidebar */}
-        <aside className="fixed left-0 top-20 h-[calc(100vh-5rem)] w-64 overflow-y-auto bg-slate-50 border-r border-slate-200/50 flex-col p-4 space-y-6 hidden lg:flex">
+        <aside className="fixed left-0 top-16 h-[calc(100vh-4rem)] w-64 overflow-y-auto bg-slate-50 border-r border-slate-200/50 flex-col p-4 space-y-6 hidden lg:flex">
           {SIDEBAR_SECTIONS.map((section) => (
             <div key={section.title}>
               <h3 className="px-3 mb-2 text-xs font-bold text-slate-400 uppercase tracking-widest">

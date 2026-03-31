@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 
 // Landing page components
 import { Navbar } from "./components/Navbar";
@@ -39,7 +39,7 @@ function LandingPage() {
   return (
     <div className="bg-surface font-body text-on-surface">
       <Navbar />
-      <main className="pt-20">
+      <main className="pt-16">
         <Hero />
         <Stats />
         <Providers />
@@ -79,6 +79,8 @@ function App() {
       <Route path="/settings/management-keys" element={<ManagementKeysPage />} />
       <Route path="/settings/preferences" element={<PreferencesPage />} />
       <Route path="/settings/logs" element={<LogsPage />} />
+      {/* Catch-all: redirect unknown paths to home */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }

@@ -54,6 +54,9 @@ export default function ApiKeysPage({ className }: ApiKeysPageProps) {
   const [menuOpen, setMenuOpen] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
   const [newKeyName, setNewKeyName] = useState("");
+  const [newKeyCreditLimit, setNewKeyCreditLimit] = useState("");
+  const [newKeyResetLimit, setNewKeyResetLimit] = useState("N/A");
+  const [newKeyExpiration, setNewKeyExpiration] = useState("No expiration");
   const [createdFullKey, setCreatedFullKey] = useState<string | null>(null);
   const [editingKey, setEditingKey] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
@@ -89,6 +92,9 @@ export default function ApiKeysPage({ className }: ApiKeysPageProps) {
     setKeys((prev) => [...prev, newKey]);
     setCreatedFullKey(full);
     setNewKeyName("");
+    setNewKeyCreditLimit("");
+    setNewKeyResetLimit("N/A");
+    setNewKeyExpiration("No expiration");
   };
 
   const handleDelete = (fullKey: string) => {
@@ -105,32 +111,32 @@ export default function ApiKeysPage({ className }: ApiKeysPageProps) {
 
   return (
     <SettingsLayout activeTab="api-keys" className={className}>
-      <main className="flex-1 p-10 max-w-6xl w-full mx-auto">
+      <main className="flex-1 p-4 sm:p-6 md:p-10 max-w-6xl w-full mx-auto">
         {/* Page Header */}
         <header className="mb-8">
-          <h2 className="text-3xl font-bold font-headline tracking-tight mb-2">API Keys</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold font-headline tracking-tight mb-2">API Keys</h2>
           <p className="text-on-surface-variant text-sm">
             Create and manage your API keys for accessing NexusAI.
           </p>
         </header>
 
         {/* Info Banner */}
-        <div className="bg-blue-700 p-6 rounded-xl flex items-center justify-between mb-12 shadow-lg shadow-blue-700/10">
+        <div className="bg-primary p-5 sm:p-6 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-12">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center text-white">
               <span className="material-symbols-outlined text-[28px]">info</span>
             </div>
             <div>
-              <p className="text-white font-semibold text-lg">
+              <p className="text-white font-semibold text-base sm:text-lg">
                 Your default API key has full access to all models.
               </p>
-              <p className="text-blue-100/80 text-sm">
+              <p className="text-white/70 text-sm">
                 Keep your keys secure and do not share them in public repositories.
               </p>
             </div>
           </div>
           <button
-            className="bg-white text-blue-700 font-bold px-6 py-3 rounded-lg hover:bg-slate-50 transition-colors flex items-center gap-2"
+            className="bg-white text-primary font-bold px-5 py-2.5 rounded-lg hover:bg-white/90 transition-colors flex items-center gap-2 w-fit"
             onClick={() => { setShowCreate(true); setCreatedFullKey(null); }}
           >
             <span className="material-symbols-outlined text-[20px]">add</span>
@@ -140,69 +146,126 @@ export default function ApiKeysPage({ className }: ApiKeysPageProps) {
 
         {/* Create Key Modal */}
         {showCreate && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50" onClick={() => { setShowCreate(false); setCreatedFullKey(null); }}>
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-md mx-4" onClick={(e) => e.stopPropagation()}>
-              <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-                <h3 className="text-lg font-bold font-headline">
-                  {createdFullKey ? "Key Created" : "Create New API Key"}
-                </h3>
-                <button
-                  className="w-7 h-7 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 flex items-center justify-center transition-colors"
-                  onClick={() => { setShowCreate(false); setCreatedFullKey(null); }}
-                >
-                  <span className="material-symbols-outlined text-[18px]">close</span>
-                </button>
-              </div>
-              <div className="px-6 py-5">
-                {createdFullKey ? (
-                  <div>
-                    <p className="text-sm text-on-surface-variant mb-3">
-                      Copy this key now. You won't be able to see it again.
-                    </p>
-                    <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-lg p-3">
-                      <code className="text-xs font-mono text-on-surface flex-1 break-all">{createdFullKey}</code>
-                      <button
-                        className="shrink-0 p-1.5 text-slate-400 hover:text-primary hover:bg-primary/5 rounded transition-colors"
-                        onClick={() => copyToClipboard(createdFullKey, "new-key")}
-                      >
-                        <span className="material-symbols-outlined text-[18px]">
-                          {copiedKey === "new-key" ? "check" : "content_copy"}
-                        </span>
-                      </button>
-                    </div>
-                    {copiedKey === "new-key" && (
-                      <p className="text-xs text-emerald-600 mt-2 font-medium">Copied to clipboard!</p>
-                    )}
-                  </div>
-                ) : (
-                  <div>
-                    <label className="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant block mb-1.5">
-                      Key Name
-                    </label>
-                    <input
-                      type="text"
-                      value={newKeyName}
-                      onChange={(e) => setNewKeyName(e.target.value)}
-                      placeholder="e.g. Production App"
-                      className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder:text-slate-400"
-                      autoFocus
-                      onKeyDown={(e) => e.key === "Enter" && handleCreate()}
-                    />
-                  </div>
-                )}
-              </div>
-              <div className="flex justify-end gap-3 px-6 py-4 border-t border-slate-100">
-                {createdFullKey ? (
-                  <button
-                    className="px-5 py-2.5 bg-primary text-white font-semibold rounded-lg text-sm hover:opacity-90 transition-opacity"
-                    onClick={() => { setShowCreate(false); setCreatedFullKey(null); }}
-                  >
-                    Done
-                  </button>
-                ) : (
-                  <>
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40" onClick={() => { setShowCreate(false); setCreatedFullKey(null); }}>
+            <div className="bg-surface-container-lowest rounded-xl shadow-xl w-full max-w-lg mx-4" onClick={(e) => e.stopPropagation()}>
+              {createdFullKey ? (
+                /* Key Created State */
+                <div className="p-6 sm:p-8">
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-lg font-bold font-headline">Key Created</h3>
                     <button
-                      className="px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-lg transition-colors"
+                      className="w-8 h-8 flex items-center justify-center rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors"
+                      onClick={() => { setShowCreate(false); setCreatedFullKey(null); }}
+                    >
+                      <span className="material-symbols-outlined text-xl">close</span>
+                    </button>
+                  </div>
+                  <p className="text-sm text-on-surface-variant mb-3">
+                    Copy this key now. You won't be able to see it again.
+                  </p>
+                  <div className="flex items-center gap-2 bg-surface-container rounded-lg p-3">
+                    <code className="text-xs font-mono text-on-surface flex-1 break-all">{createdFullKey}</code>
+                    <button
+                      className="shrink-0 p-1.5 text-on-surface-variant hover:text-primary hover:bg-primary/5 rounded transition-colors"
+                      onClick={() => copyToClipboard(createdFullKey, "new-key")}
+                    >
+                      <span className="material-symbols-outlined text-[18px]">
+                        {copiedKey === "new-key" ? "check" : "content_copy"}
+                      </span>
+                    </button>
+                  </div>
+                  {copiedKey === "new-key" && (
+                    <p className="text-xs text-emerald-600 mt-2 font-medium">Copied to clipboard!</p>
+                  )}
+                  <div className="flex justify-end mt-6">
+                    <button
+                      className="px-5 py-2.5 bg-primary text-white font-semibold rounded-lg text-sm hover:opacity-90 transition-opacity"
+                      onClick={() => { setShowCreate(false); setCreatedFullKey(null); }}
+                    >
+                      Done
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                /* Create Form State */
+                <div className="p-6 sm:p-8">
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-lg font-bold font-headline">Create API Key</h3>
+                    <button
+                      className="w-8 h-8 flex items-center justify-center rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors"
+                      onClick={() => setShowCreate(false)}
+                    >
+                      <span className="material-symbols-outlined text-xl">close</span>
+                    </button>
+                  </div>
+                  <div className="space-y-5">
+                    {/* Name */}
+                    <div>
+                      <label className="text-sm font-semibold text-on-surface block mb-2">Name</label>
+                      <input
+                        type="text"
+                        value={newKeyName}
+                        onChange={(e) => setNewKeyName(e.target.value)}
+                        placeholder='e.g. "Chatbot Key"'
+                        className="w-full bg-surface-container rounded-lg px-4 py-2.5 text-sm focus:ring-1 focus:ring-primary/30 focus:outline-none transition-all placeholder:text-on-surface-variant"
+                        autoFocus
+                        onKeyDown={(e) => e.key === "Enter" && handleCreate()}
+                      />
+                    </div>
+
+                    {/* Credit limit */}
+                    <div>
+                      <label className="text-sm font-semibold text-on-surface block mb-2">Credit limit (optional)</label>
+                      <input
+                        type="text"
+                        value={newKeyCreditLimit}
+                        onChange={(e) => setNewKeyCreditLimit(e.target.value)}
+                        placeholder="Leave blank for unlimited"
+                        className="w-full bg-surface-container rounded-lg px-4 py-2.5 text-sm focus:ring-1 focus:ring-primary/30 focus:outline-none transition-all placeholder:text-on-surface-variant"
+                      />
+                    </div>
+
+                    {/* Reset limit every */}
+                    <div>
+                      <label className="text-sm font-semibold text-on-surface block mb-2">Reset limit every...</label>
+                      <div className="relative">
+                        <select
+                          value={newKeyResetLimit}
+                          onChange={(e) => setNewKeyResetLimit(e.target.value)}
+                          className="w-full appearance-none bg-surface-container rounded-lg px-4 py-2.5 pr-10 text-sm focus:ring-1 focus:ring-primary/30 focus:outline-none transition-all"
+                        >
+                          <option>N/A</option>
+                          <option>Daily</option>
+                          <option>Weekly</option>
+                          <option>Monthly</option>
+                        </select>
+                        <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant text-[18px]">expand_more</span>
+                      </div>
+                    </div>
+
+                    {/* Expiration */}
+                    <div>
+                      <label className="text-sm font-semibold text-on-surface block mb-2">Expiration</label>
+                      <div className="relative">
+                        <select
+                          value={newKeyExpiration}
+                          onChange={(e) => setNewKeyExpiration(e.target.value)}
+                          className="w-full appearance-none bg-surface-container rounded-lg px-4 py-2.5 pr-10 text-sm focus:ring-1 focus:ring-primary/30 focus:outline-none transition-all"
+                        >
+                          <option>No expiration</option>
+                          <option>7 days</option>
+                          <option>30 days</option>
+                          <option>90 days</option>
+                          <option>1 year</option>
+                        </select>
+                        <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant text-[18px]">expand_more</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end gap-3 mt-8">
+                    <button
+                      className="px-5 py-2.5 bg-surface-container text-on-surface-variant font-semibold rounded-lg text-sm hover:bg-surface-container-high transition-colors"
                       onClick={() => setShowCreate(false)}
                     >
                       Cancel
@@ -211,26 +274,26 @@ export default function ApiKeysPage({ className }: ApiKeysPageProps) {
                       className="px-5 py-2.5 bg-primary text-white font-semibold rounded-lg text-sm hover:opacity-90 transition-opacity"
                       onClick={handleCreate}
                     >
-                      Create Key
+                      Create
                     </button>
-                  </>
-                )}
-              </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}
 
         {/* Rename Modal */}
         {editingKey && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50" onClick={() => setEditingKey(null)}>
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm mx-4" onClick={(e) => e.stopPropagation()}>
-              <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40" onClick={() => setEditingKey(null)}>
+            <div className="bg-surface-container-lowest rounded-xl shadow-xl w-full max-w-sm mx-4" onClick={(e) => e.stopPropagation()}>
+              <div className="flex items-center justify-between px-6 py-4 border-b border-outline-variant/10">
                 <h3 className="text-lg font-bold font-headline">Rename Key</h3>
                 <button
-                  className="w-7 h-7 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 flex items-center justify-center transition-colors"
+                  className="w-8 h-8 flex items-center justify-center rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors"
                   onClick={() => setEditingKey(null)}
                 >
-                  <span className="material-symbols-outlined text-[18px]">close</span>
+                  <span className="material-symbols-outlined text-xl">close</span>
                 </button>
               </div>
               <div className="px-6 py-5">
@@ -238,13 +301,13 @@ export default function ApiKeysPage({ className }: ApiKeysPageProps) {
                   type="text"
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
-                  className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                  className="w-full bg-surface-container-lowest rounded-lg px-3 py-2.5 text-sm border border-outline-variant/10 focus:ring-1 focus:ring-primary/30 focus:outline-none transition-all"
                   autoFocus
                   onKeyDown={(e) => e.key === "Enter" && handleRename(editingKey)}
                 />
               </div>
-              <div className="flex justify-end gap-3 px-6 py-4 border-t border-slate-100">
-                <button className="px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-lg transition-colors" onClick={() => setEditingKey(null)}>
+              <div className="flex justify-end gap-3 px-6 py-4 border-t border-outline-variant/10">
+                <button className="px-4 py-2.5 text-sm font-medium text-on-surface-variant hover:bg-surface-container rounded-lg transition-colors" onClick={() => setEditingKey(null)}>
                   Cancel
                 </button>
                 <button className="px-5 py-2.5 bg-primary text-white font-semibold rounded-lg text-sm hover:opacity-90 transition-opacity" onClick={() => handleRename(editingKey)}>
@@ -257,15 +320,15 @@ export default function ApiKeysPage({ className }: ApiKeysPageProps) {
 
         {/* Delete Confirm Modal */}
         {deleteConfirm && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50" onClick={() => setDeleteConfirm(null)}>
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm mx-4" onClick={(e) => e.stopPropagation()}>
-              <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-                <h3 className="text-lg font-bold font-headline text-red-600">Delete Key</h3>
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40" onClick={() => setDeleteConfirm(null)}>
+            <div className="bg-surface-container-lowest rounded-xl shadow-xl w-full max-w-sm mx-4" onClick={(e) => e.stopPropagation()}>
+              <div className="flex items-center justify-between px-6 py-4 border-b border-outline-variant/10">
+                <h3 className="text-lg font-bold font-headline text-error">Delete Key</h3>
                 <button
-                  className="w-7 h-7 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 flex items-center justify-center transition-colors"
+                  className="w-8 h-8 flex items-center justify-center rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors"
                   onClick={() => setDeleteConfirm(null)}
                 >
-                  <span className="material-symbols-outlined text-[18px]">close</span>
+                  <span className="material-symbols-outlined text-xl">close</span>
                 </button>
               </div>
               <div className="px-6 py-5">
@@ -273,11 +336,11 @@ export default function ApiKeysPage({ className }: ApiKeysPageProps) {
                   Are you sure? Any applications using this key will immediately lose access. This cannot be undone.
                 </p>
               </div>
-              <div className="flex justify-end gap-3 px-6 py-4 border-t border-slate-100">
-                <button className="px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-lg transition-colors" onClick={() => setDeleteConfirm(null)}>
+              <div className="flex justify-end gap-3 px-6 py-4 border-t border-outline-variant/10">
+                <button className="px-4 py-2.5 text-sm font-medium text-on-surface-variant hover:bg-surface-container rounded-lg transition-colors" onClick={() => setDeleteConfirm(null)}>
                   Cancel
                 </button>
-                <button className="px-5 py-2.5 bg-red-600 text-white font-semibold rounded-lg text-sm hover:bg-red-700 transition-colors" onClick={() => handleDelete(deleteConfirm)}>
+                <button className="px-5 py-2.5 bg-error text-white font-semibold rounded-lg text-sm hover:opacity-90 transition-opacity" onClick={() => handleDelete(deleteConfirm)}>
                   Delete
                 </button>
               </div>
@@ -285,31 +348,31 @@ export default function ApiKeysPage({ className }: ApiKeysPageProps) {
           </div>
         )}
 
-        {/* Table */}
-        <div className="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden ring-1 ring-slate-100">
+        {/* Table - Desktop */}
+        <div className="hidden md:block bg-surface-container-lowest rounded-xl overflow-hidden">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-surface-container-low">
-                <th className="px-6 py-4 text-[11px] font-extrabold text-on-surface-variant uppercase tracking-widest">Name</th>
-                <th className="px-6 py-4 text-[11px] font-extrabold text-on-surface-variant uppercase tracking-widest">Key</th>
-                <th className="px-6 py-4 text-[11px] font-extrabold text-on-surface-variant uppercase tracking-widest">Created</th>
-                <th className="px-6 py-4 text-[11px] font-extrabold text-on-surface-variant uppercase tracking-widest">Last Used</th>
-                <th className="px-6 py-4 text-[11px] font-extrabold text-on-surface-variant uppercase tracking-widest text-right">Actions</th>
+              <tr>
+                <th className="px-5 py-3.5 text-[11px] font-semibold text-on-surface-variant uppercase tracking-wider">Name</th>
+                <th className="px-5 py-3.5 text-[11px] font-semibold text-on-surface-variant uppercase tracking-wider">Key</th>
+                <th className="px-5 py-3.5 text-[11px] font-semibold text-on-surface-variant uppercase tracking-wider">Created</th>
+                <th className="px-5 py-3.5 text-[11px] font-semibold text-on-surface-variant uppercase tracking-wider">Last Used</th>
+                <th className="px-5 py-3.5 text-[11px] font-semibold text-on-surface-variant uppercase tracking-wider text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
               {keys.map((apiKey) => (
-                <tr key={apiKey.fullKey} className="hover:bg-surface-container-high/30 transition-colors group border-t border-slate-50">
-                  <td className="px-6 py-5">
-                    <span className="font-semibold text-on-surface">{apiKey.name}</span>
+                <tr key={apiKey.fullKey} className="border-t border-outline-variant/10 hover:bg-surface-container/40 transition-colors group">
+                  <td className="px-5 py-4">
+                    <span className="font-semibold text-on-surface text-sm">{apiKey.name}</span>
                   </td>
-                  <td className="px-6 py-5">
+                  <td className="px-5 py-4">
                     <div className="flex items-center gap-2">
-                      <code className="bg-surface-container font-mono text-xs px-2 py-1 rounded border border-outline-variant/30 text-on-surface-variant">
+                      <code className="bg-surface-container font-mono text-xs px-2 py-1 rounded text-on-surface-variant">
                         {apiKey.key}
                       </code>
                       <button
-                        className={`transition-all ${copiedKey === apiKey.fullKey ? "text-emerald-500" : "text-slate-400 hover:text-primary opacity-0 group-hover:opacity-100"}`}
+                        className={`transition-all ${copiedKey === apiKey.fullKey ? "text-emerald-500" : "text-on-surface-variant hover:text-primary opacity-0 group-hover:opacity-100"}`}
                         onClick={() => copyToClipboard(apiKey.fullKey, apiKey.fullKey)}
                         title="Copy full key"
                       >
@@ -319,9 +382,9 @@ export default function ApiKeysPage({ className }: ApiKeysPageProps) {
                       </button>
                     </div>
                   </td>
-                  <td className="px-6 py-5 text-on-surface-variant text-sm">{apiKey.created}</td>
-                  <td className="px-6 py-5 text-on-surface-variant text-sm">{apiKey.lastUsed}</td>
-                  <td className="px-6 py-5 text-right relative">
+                  <td className="px-5 py-4 text-on-surface-variant text-xs">{apiKey.created}</td>
+                  <td className="px-5 py-4 text-on-surface-variant text-xs">{apiKey.lastUsed}</td>
+                  <td className="px-5 py-4 text-right relative">
                     <button
                       className="w-8 h-8 inline-flex items-center justify-center rounded-lg hover:bg-surface-container text-on-surface-variant transition-colors"
                       onClick={() => setMenuOpen(menuOpen === apiKey.fullKey ? null : apiKey.fullKey)}
@@ -329,24 +392,24 @@ export default function ApiKeysPage({ className }: ApiKeysPageProps) {
                       <span className="material-symbols-outlined">more_horiz</span>
                     </button>
                     {menuOpen === apiKey.fullKey && (
-                      <div ref={menuRef} className="absolute right-6 top-full mt-1 w-44 bg-white rounded-lg shadow-xl border border-slate-100 py-1 z-50">
+                      <div ref={menuRef} className="absolute right-6 top-full mt-1 w-44 bg-surface-container-lowest rounded-xl shadow-xl py-1 z-50">
                         <button
-                          className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+                          className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm text-on-surface hover:bg-surface-container/60 transition-colors"
                           onClick={() => copyToClipboard(apiKey.fullKey, apiKey.fullKey)}
                         >
-                          <span className="material-symbols-outlined text-[18px] text-slate-400">content_copy</span>
+                          <span className="material-symbols-outlined text-[18px] text-on-surface-variant">content_copy</span>
                           Copy Key
                         </button>
                         <button
-                          className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+                          className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm text-on-surface hover:bg-surface-container/60 transition-colors"
                           onClick={() => { setEditingKey(apiKey.fullKey); setEditName(apiKey.name); setMenuOpen(null); }}
                         >
-                          <span className="material-symbols-outlined text-[18px] text-slate-400">edit</span>
+                          <span className="material-symbols-outlined text-[18px] text-on-surface-variant">edit</span>
                           Rename
                         </button>
-                        <div className="border-t border-slate-100 my-1" />
+                        <div className="border-t border-outline-variant/10 my-1" />
                         <button
-                          className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                          className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm text-error hover:bg-error/5 transition-colors"
                           onClick={() => { setDeleteConfirm(apiKey.fullKey); setMenuOpen(null); }}
                         >
                           <span className="material-symbols-outlined text-[18px]">delete</span>
@@ -360,13 +423,53 @@ export default function ApiKeysPage({ className }: ApiKeysPageProps) {
               {keys.length === 0 && (
                 <tr>
                   <td colSpan={5} className="px-6 py-12 text-center text-on-surface-variant">
-                    <span className="material-symbols-outlined text-[40px] text-slate-300 mb-2 block">key_off</span>
+                    <span className="material-symbols-outlined text-[40px] text-on-surface-variant/30 mb-2 block">key_off</span>
                     <p className="text-sm">No API keys yet. Create one to get started.</p>
                   </td>
                 </tr>
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Cards - Mobile */}
+        <div className="md:hidden space-y-3">
+          {keys.map((apiKey) => (
+            <div key={apiKey.fullKey} className="bg-surface-container-lowest rounded-xl p-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="font-semibold text-on-surface text-sm">{apiKey.name}</span>
+                <button
+                  className="w-8 h-8 inline-flex items-center justify-center rounded-lg hover:bg-surface-container text-on-surface-variant transition-colors"
+                  onClick={() => setMenuOpen(menuOpen === apiKey.fullKey ? null : apiKey.fullKey)}
+                >
+                  <span className="material-symbols-outlined text-xl">more_horiz</span>
+                </button>
+              </div>
+              <div className="flex items-center gap-2 mb-3">
+                <code className="bg-surface-container font-mono text-xs px-2 py-1 rounded text-on-surface-variant">
+                  {apiKey.key}
+                </code>
+                <button
+                  className={`transition-all ${copiedKey === apiKey.fullKey ? "text-emerald-500" : "text-on-surface-variant hover:text-primary"}`}
+                  onClick={() => copyToClipboard(apiKey.fullKey, apiKey.fullKey)}
+                >
+                  <span className="material-symbols-outlined text-[16px]">
+                    {copiedKey === apiKey.fullKey ? "check" : "content_copy"}
+                  </span>
+                </button>
+              </div>
+              <div className="flex items-center justify-between text-xs text-on-surface-variant">
+                <span>Created {apiKey.created}</span>
+                <span>Last used {apiKey.lastUsed}</span>
+              </div>
+            </div>
+          ))}
+          {keys.length === 0 && (
+            <div className="text-center py-12 text-on-surface-variant">
+              <span className="material-symbols-outlined text-[40px] text-on-surface-variant/30 mb-2 block">key_off</span>
+              <p className="text-sm">No API keys yet. Create one to get started.</p>
+            </div>
+          )}
         </div>
       </main>
     </SettingsLayout>

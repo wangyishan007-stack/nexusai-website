@@ -1,175 +1,223 @@
+import { useState } from "react";
 import SettingsLayout from "../components/SettingsLayout";
 
+const TABS = ["Generations", "Jobs", "Sessions"] as const;
+
 const LOG_ENTRIES = [
-  { time: "14:23:08.412", method: "POST", path: "/v1/chat/completions", model: "claude-3.5-sonnet", status: 200, latency: "1,240ms", tokens: "1,842", cost: "$0.0276" },
-  { time: "14:22:55.871", method: "POST", path: "/v1/chat/completions", model: "gpt-4o", status: 200, latency: "2,810ms", tokens: "3,104", cost: "$0.0465" },
-  { time: "14:22:41.223", method: "POST", path: "/v1/embeddings", model: "text-embedding-3-large", status: 200, latency: "89ms", tokens: "256", cost: "$0.0001" },
-  { time: "14:21:33.005", method: "POST", path: "/v1/chat/completions", model: "mistral-7b-instruct", status: 200, latency: "340ms", tokens: "512", cost: "$0.0002" },
-  { time: "14:20:12.789", method: "POST", path: "/v1/chat/completions", model: "claude-3.5-sonnet", status: 429, latency: "12ms", tokens: "0", cost: "$0.0000" },
-  { time: "14:19:55.441", method: "POST", path: "/v1/images/generations", model: "dall-e-3", status: 200, latency: "8,420ms", tokens: "—", cost: "$0.0400" },
-  { time: "14:18:02.112", method: "POST", path: "/v1/chat/completions", model: "llama-3.1-405b", status: 200, latency: "4,105ms", tokens: "5,280", cost: "$0.0158" },
-  { time: "14:17:44.890", method: "POST", path: "/v1/chat/completions", model: "gpt-4o", status: 500, latency: "5,001ms", tokens: "0", cost: "$0.0000" },
-  { time: "14:16:30.556", method: "GET", path: "/v1/models", model: "—", status: 200, latency: "24ms", tokens: "—", cost: "$0.0000" },
-  { time: "14:15:11.233", method: "POST", path: "/v1/chat/completions", model: "gemini-1.5-pro", status: 200, latency: "1,680ms", tokens: "2,048", cost: "$0.0102" },
+  { time: "Mar 31, 02:57", provider: "Anthropic", model: "Claude 3.5 Sonnet", app: "NexusAI: Gateway", tokensIn: 182, tokensOut: 1660, cost: "$ 0.02760", speed: "42.1 tps", finish: "stop" },
+  { time: "Mar 31, 02:55", provider: "OpenAI", model: "GPT-4o", app: "NexusAI: Gateway", tokensIn: 304, tokensOut: 2800, cost: "$ 0.04650", speed: "35.8 tps", finish: "stop" },
+  { time: "Mar 31, 02:41", provider: "OpenAI", model: "Text Embedding 3 Large", app: "NexusAI: Gateway", tokensIn: 256, tokensOut: 0, cost: "$ 0.00010", speed: "—", finish: "stop" },
+  { time: "Mar 31, 02:33", provider: "Mistral", model: "Mistral 7B Instruct", app: "NexusAI: Gateway", tokensIn: 128, tokensOut: 384, cost: "$ 0.00020", speed: "18.2 tps", finish: "stop" },
+  { time: "Mar 31, 02:20", provider: "Anthropic", model: "Claude 3.5 Sonnet", app: "NexusAI: Gateway", tokensIn: 0, tokensOut: 0, cost: "$ 0.00000", speed: "—", finish: "error" },
+  { time: "Mar 31, 02:19", provider: "OpenAI", model: "DALL-E 3", app: "NexusAI: Gateway", tokensIn: 0, tokensOut: 0, cost: "$ 0.04000", speed: "—", finish: "stop" },
+  { time: "Mar 31, 02:18", provider: "Meta", model: "Llama 3.1 405B", app: "NexusAI: Gateway", tokensIn: 480, tokensOut: 4800, cost: "$ 0.01580", speed: "19.4 tps", finish: "stop" },
+  { time: "Mar 31, 02:17", provider: "OpenAI", model: "GPT-4o", app: "NexusAI: Gateway", tokensIn: 0, tokensOut: 0, cost: "$ 0.00000", speed: "—", finish: "error" },
+  { time: "Mar 31, 02:16", provider: "Google", model: "Gemini 1.5 Pro", app: "NexusAI: Gateway", tokensIn: 248, tokensOut: 1800, cost: "$ 0.01020", speed: "28.6 tps", finish: "stop" },
+  { time: "Mar 31, 02:15", provider: "DeepSeek", model: "DeepSeek V3 0324", app: "NexusAI: Gateway", tokensIn: 161, tokensOut: 224, cost: "$ 0.00023", speed: "25.2 tps", finish: "stop" },
 ];
 
-const STAT_CARDS = [
-  { label: "Total Requests", value: "2,847", change: "+12.4%", icon: "swap_horiz" },
-  { label: "Avg Latency", value: "1.24s", change: "-8.2%", icon: "speed" },
-  { label: "Error Rate", value: "0.34%", change: "-0.1%", icon: "error_outline" },
-  { label: "Tokens Processed", value: "4.2M", change: "+18.7%", icon: "token" },
+// Simple bar chart data
+const CHART_DATA = [
+  { label: "Mar 24", value: 0 },
+  { label: "Mar 25", value: 0 },
+  { label: "Mar 26", value: 4 },
+  { label: "Mar 27", value: 0 },
+  { label: "Mar 28", value: 0 },
+  { label: "Mar 29", value: 0 },
+  { label: "Mar 30", value: 2 },
+  { label: "Mar 31", value: 10 },
 ];
 
 export default function LogsPage() {
+  const [activeTab, setActiveTab] = useState<(typeof TABS)[number]>("Generations");
+  const maxVal = Math.max(...CHART_DATA.map((d) => d.value), 1);
+
   return (
     <SettingsLayout activeTab="logs">
-      <div className="flex-1 p-10 max-w-6xl w-full mx-auto">
-        {/* Page Title */}
-        <div className="mb-8 flex justify-between items-end">
-          <div>
-            <h2 className="text-3xl font-bold font-headline tracking-tight mb-2">Logs</h2>
-            <p className="text-on-surface-variant text-sm">
-              Real-time API request logs with latency, token usage, and error tracking.
-            </p>
+      <div className="flex-1 p-4 sm:p-6 md:p-10 max-w-6xl w-full mx-auto">
+        {/* Tabs */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-6">
+            {TABS.map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`pb-2 text-sm font-medium transition-colors ${
+                  activeTab === tab
+                    ? "text-on-surface border-b-2 border-primary"
+                    : "text-on-surface-variant hover:text-on-surface"
+                }`}
+              >
+                {tab}
+              </button>
+            ))}
           </div>
-          <div className="flex gap-3">
-            <button className="bg-surface-container-high text-on-surface px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-surface-variant transition-colors">
-              <span className="material-symbols-outlined text-[18px]">pause</span>
-              Pause Stream
+          <button className="text-on-surface-variant hover:text-on-surface transition-colors">
+            <span className="material-symbols-outlined text-xl">refresh</span>
+          </button>
+        </div>
+
+        {/* Date Range & Actions */}
+        <div className="flex flex-wrap items-center gap-3 mb-8">
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-on-surface-variant font-medium">From:</span>
+            <input
+              type="datetime-local"
+              defaultValue="2026-03-24T21:46"
+              className="bg-surface-container-lowest rounded-lg px-3 py-1.5 text-sm text-on-surface focus:outline-none focus:ring-1 focus:ring-primary/30 transition-all"
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-on-surface-variant font-medium">To:</span>
+            <input
+              type="datetime-local"
+              defaultValue="2026-03-31T21:46"
+              className="bg-surface-container-lowest rounded-lg px-3 py-1.5 text-sm text-on-surface focus:outline-none focus:ring-1 focus:ring-primary/30 transition-all"
+            />
+          </div>
+          <div className="flex items-center gap-2 ml-auto">
+            <button className="flex items-center gap-1.5 px-3 py-1.5 bg-surface-container rounded-lg text-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors">
+              <span className="material-symbols-outlined text-[16px]">tune</span>
+              Filters
             </button>
-            <button className="bg-surface-container-high text-on-surface px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-surface-variant transition-colors">
-              <span className="material-symbols-outlined text-[18px]">download</span>
+            <button className="flex items-center gap-1.5 px-3 py-1.5 bg-surface-container rounded-lg text-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors">
+              <span className="material-symbols-outlined text-[16px]">flag</span>
+              <span className="hidden sm:inline">Report Feedback</span>
+            </button>
+            <button className="flex items-center gap-1.5 px-3 py-1.5 bg-surface-container rounded-lg text-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors">
+              <span className="material-symbols-outlined text-[16px]">download</span>
               Export
             </button>
           </div>
         </div>
 
-        {/* Stat Cards */}
-        <div className="grid grid-cols-4 gap-4 mb-6">
-          {STAT_CARDS.map((stat) => (
-            <div key={stat.label} className="bg-surface-container-lowest rounded-xl p-4 border border-outline-variant/15">
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">{stat.label}</p>
-                <span className="material-symbols-outlined text-primary text-[18px]">{stat.icon}</span>
+        {/* Bar Chart */}
+        <div className="bg-surface-container-lowest rounded-xl p-6 mb-8">
+          <div className="flex items-end gap-1.5 h-20">
+            {CHART_DATA.map((d) => (
+              <div key={d.label} className="flex-1 flex flex-col items-center">
+                <div
+                  className="w-full max-w-[36px] bg-primary rounded-sm transition-all"
+                  style={{ height: d.value > 0 ? `${Math.max((d.value / maxVal) * 64, 4)}px` : "0px" }}
+                />
               </div>
-              <div className="flex items-end gap-2">
-                <h3 className="text-xl font-bold font-headline">{stat.value}</h3>
-                <span className={`text-[10px] font-semibold mb-0.5 ${stat.change.startsWith("+") && stat.label !== "Error Rate" ? "text-emerald-600" : stat.change.startsWith("-") && stat.label === "Error Rate" ? "text-emerald-600" : stat.change.startsWith("-") ? "text-emerald-600" : "text-emerald-600"}`}>
-                  {stat.change}
+            ))}
+          </div>
+          <div className="flex gap-1.5 mt-3">
+            {CHART_DATA.map((d) => (
+              <div key={d.label} className="flex-1 text-center text-[10px] text-on-surface-variant font-medium">
+                {d.label}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Table - Desktop */}
+        <div className="hidden md:block bg-surface-container-lowest rounded-xl overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant">
+                  <th className="text-left px-5 py-3.5">
+                    Timestamp
+                  </th>
+                  <th className="text-left px-5 py-3.5">
+                    Provider / Model
+                  </th>
+                  <th className="text-left px-5 py-3.5">
+                    App
+                  </th>
+                  <th className="text-right px-5 py-3.5">
+                    Tokens
+                  </th>
+                  <th className="text-right px-5 py-3.5">
+                    Cost
+                  </th>
+                  <th className="text-right px-5 py-3.5">
+                    Speed
+                  </th>
+                  <th className="text-right px-5 py-3.5">Finish</th>
+                </tr>
+              </thead>
+              <tbody>
+                {LOG_ENTRIES.map((log, i) => (
+                  <tr
+                    key={i}
+                    className="border-t border-outline-variant/10 hover:bg-surface-container/40 transition-colors cursor-pointer"
+                  >
+                    <td className="px-5 py-3.5 text-on-surface-variant text-xs font-medium">{log.time}</td>
+                    <td className="px-5 py-3.5">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-bold text-on-surface-variant bg-surface-container px-1.5 py-0.5 rounded">
+                          {log.provider.charAt(0)}
+                        </span>
+                        <span className="text-sm text-primary font-medium">{log.model}</span>
+                      </div>
+                    </td>
+                    <td className="px-5 py-3.5 text-xs text-on-surface-variant">{log.app}</td>
+                    <td className="px-5 py-3.5 text-right text-xs text-on-surface tabular-nums">
+                      {log.tokensIn} <span className="text-on-surface-variant">&rarr;</span> {log.tokensOut}
+                    </td>
+                    <td className="px-5 py-3.5 text-right text-xs text-on-surface tabular-nums">{log.cost}</td>
+                    <td className="px-5 py-3.5 text-right text-xs text-on-surface-variant tabular-nums">{log.speed}</td>
+                    <td className="px-5 py-3.5 text-right">
+                      <span className={`text-xs font-medium ${log.finish === "error" ? "text-error" : "text-on-surface-variant"}`}>
+                        {log.finish}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Pagination */}
+          <div className="flex items-center justify-center gap-1 py-5 border-t border-outline-variant/10">
+            <button className="w-8 h-8 flex items-center justify-center text-on-surface-variant hover:bg-surface-container rounded-lg transition-colors">
+              <span className="material-symbols-outlined text-[18px]">chevron_left</span>
+            </button>
+            <button className="w-8 h-8 flex items-center justify-center text-sm font-semibold text-primary bg-primary/8 rounded-lg">
+              1
+            </button>
+            <button className="w-8 h-8 flex items-center justify-center text-on-surface-variant hover:bg-surface-container rounded-lg transition-colors">
+              <span className="material-symbols-outlined text-[18px]">chevron_right</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Cards - Mobile */}
+        <div className="md:hidden space-y-3">
+          {LOG_ENTRIES.map((log, i) => (
+            <div key={i} className="bg-surface-container-lowest rounded-xl p-4">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-bold text-on-surface-variant bg-surface-container px-1.5 py-0.5 rounded">
+                    {log.provider.charAt(0)}
+                  </span>
+                  <span className="text-sm font-medium text-primary">{log.model}</span>
+                </div>
+                <span className={`text-xs font-medium ${log.finish === "error" ? "text-error" : "text-on-surface-variant"}`}>
+                  {log.finish}
                 </span>
+              </div>
+              <p className="text-[11px] text-on-surface-variant mb-2">{log.time}</p>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-on-surface-variant tabular-nums">{log.tokensIn} &rarr; {log.tokensOut}</span>
+                <span className="text-on-surface-variant tabular-nums">{log.speed}</span>
+                <span className="text-on-surface font-medium tabular-nums">{log.cost}</span>
               </div>
             </div>
           ))}
-        </div>
-
-        {/* Filters Bar */}
-        <div className="flex items-center gap-3 mb-6">
-          <div className="relative flex-1 max-w-sm">
-            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">
-              search
-            </span>
-            <input
-              type="text"
-              placeholder="Filter by model, path, or status..."
-              className="w-full bg-white border border-outline-variant/30 rounded-lg pl-10 pr-4 py-2 text-sm focus:ring-1 focus:ring-primary focus:border-primary transition-all placeholder:text-outline"
-            />
-          </div>
-          <div className="relative">
-            <select className="appearance-none bg-white border border-outline-variant/30 rounded-lg px-3 py-2 pr-10 text-sm focus:ring-1 focus:ring-primary transition-all">
-              <option>All Status</option>
-              <option>2xx Success</option>
-              <option>4xx Client Error</option>
-              <option>5xx Server Error</option>
-            </select>
-            <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant text-[18px]">
-              expand_more
-            </span>
-          </div>
-          <div className="relative">
-            <select className="appearance-none bg-white border border-outline-variant/30 rounded-lg px-3 py-2 pr-10 text-sm focus:ring-1 focus:ring-primary transition-all">
-              <option>Last 1 hour</option>
-              <option>Last 24 hours</option>
-              <option>Last 7 days</option>
-              <option>Last 30 days</option>
-            </select>
-            <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant text-[18px]">
-              expand_more
-            </span>
-          </div>
-          <button className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-primary hover:bg-primary-container/10 rounded-lg transition-colors">
-            <span className="material-symbols-outlined text-[18px]">refresh</span>
-            Live
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-          </button>
-        </div>
-
-        {/* Logs Table */}
-        <div className="bg-surface-container-lowest rounded-xl border border-outline-variant/15 overflow-hidden">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-outline-variant/10 text-[11px] font-bold uppercase tracking-wider text-on-surface-variant bg-surface-container-low/50">
-                <th className="text-left px-4 py-3">Time</th>
-                <th className="text-left px-4 py-3">Method</th>
-                <th className="text-left px-4 py-3">Endpoint</th>
-                <th className="text-left px-4 py-3">Model</th>
-                <th className="text-center px-4 py-3">Status</th>
-                <th className="text-right px-4 py-3">Latency</th>
-                <th className="text-right px-4 py-3">Tokens</th>
-                <th className="text-right px-4 py-3">Cost</th>
-              </tr>
-            </thead>
-            <tbody className="font-mono text-xs">
-              {LOG_ENTRIES.map((log, i) => (
-                <tr key={i} className="border-b border-outline-variant/5 hover:bg-surface-container-low/50 transition-colors cursor-pointer">
-                  <td className="px-4 py-3 text-on-surface-variant">{log.time}</td>
-                  <td className="px-4 py-3">
-                    <span className={`font-semibold ${log.method === "GET" ? "text-emerald-600" : "text-blue-600"}`}>
-                      {log.method}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-on-surface">{log.path}</td>
-                  <td className="px-4 py-3 text-on-surface-variant">{log.model}</td>
-                  <td className="px-4 py-3 text-center">
-                    <span
-                      className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold ${
-                        log.status === 200
-                          ? "bg-emerald-50 text-emerald-700"
-                          : log.status === 429
-                            ? "bg-amber-50 text-amber-700"
-                            : "bg-red-50 text-red-700"
-                      }`}
-                    >
-                      {log.status}
-                    </span>
-                  </td>
-                  <td className={`px-4 py-3 text-right ${parseInt(log.latency.replace(/,/g, "")) > 3000 ? "text-amber-600" : "text-on-surface"}`}>
-                    {log.latency}
-                  </td>
-                  <td className="px-4 py-3 text-right text-on-surface-variant">{log.tokens}</td>
-                  <td className="px-4 py-3 text-right text-on-surface">{log.cost}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <div className="flex items-center justify-between px-4 py-3 border-t border-outline-variant/10 bg-surface-container-low/30">
-            <p className="text-xs text-on-surface-variant">Showing 10 of 2,847 requests</p>
-            <div className="flex items-center gap-2">
-              <button className="px-3 py-1 text-xs font-medium text-on-surface-variant hover:bg-surface-container-high rounded transition-colors">
-                Previous
-              </button>
-              <button className="px-3 py-1 text-xs font-medium text-primary bg-primary-container/10 rounded">
-                1
-              </button>
-              <button className="px-3 py-1 text-xs font-medium text-on-surface-variant hover:bg-surface-container-high rounded transition-colors">
-                2
-              </button>
-              <button className="px-3 py-1 text-xs font-medium text-on-surface-variant hover:bg-surface-container-high rounded transition-colors">
-                3
-              </button>
-              <button className="px-3 py-1 text-xs font-medium text-on-surface-variant hover:bg-surface-container-high rounded transition-colors">
-                Next
-              </button>
-            </div>
+          <div className="flex items-center justify-center gap-1 py-4">
+            <button className="w-8 h-8 flex items-center justify-center text-on-surface-variant hover:bg-surface-container rounded-lg transition-colors">
+              <span className="material-symbols-outlined text-[18px]">chevron_left</span>
+            </button>
+            <button className="w-8 h-8 flex items-center justify-center text-sm font-semibold text-primary bg-primary/8 rounded-lg">
+              1
+            </button>
+            <button className="w-8 h-8 flex items-center justify-center text-on-surface-variant hover:bg-surface-container rounded-lg transition-colors">
+              <span className="material-symbols-outlined text-[18px]">chevron_right</span>
+            </button>
           </div>
         </div>
       </div>

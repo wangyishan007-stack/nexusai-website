@@ -44,6 +44,43 @@ const CATEGORIES = [
   { icon: "summarize", title: "Summarization", items: [{ name: "Claude Haiku 3.5", pct: "44%" }, { name: "GPT-4o Mini", pct: "32%" }, { name: "Mistral Large", pct: "12%" }] },
 ];
 
+// Top Models weekly usage data (stacked bar chart)
+const MODEL_COLORS: Record<string, string> = {
+  "GPT-4o": "#FF69B4",
+  "Claude Sonnet 4": "#FF6B35",
+  "Gemini 2.5 Pro": "#00BFA5",
+  "DeepSeek V3": "#7C4DFF",
+  "GPT-4o Mini": "#E91E63",
+  "Claude Haiku 3.5": "#FF9800",
+  "Llama 3.3 70B": "#4CAF50",
+  "Grok 3": "#2196F3",
+  "Mistral Large": "#F44336",
+  "Qwen 2.5": "#009688",
+  "Others": "#9E9E9E",
+};
+
+function generateWeeklyData() {
+  const models = Object.keys(MODEL_COLORS);
+  const weeks: { date: string; segments: { model: string; value: number }[] }[] = [];
+  const startDate = new Date(2025, 3, 7); // Apr 7 2025
+
+  for (let w = 0; w < 52; w++) {
+    const d = new Date(startDate.getTime() + w * 7 * 86_400_000);
+    const label = `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`;
+    // Exponential growth curve
+    const growth = Math.pow(1.065, w);
+    const segments = models.map((model, i) => ({
+      model,
+      value: Math.round((0.15 + Math.random() * 0.35) * growth * (i < 3 ? 1.5 : 0.6) * 500),
+    }));
+    weeks.push({ date: label, segments });
+  }
+  return weeks;
+}
+
+const WEEKLY_DATA = generateWeeklyData();
+const MAX_WEEKLY_TOTAL = Math.max(...WEEKLY_DATA.map((w) => w.segments.reduce((s, seg) => s + seg.value, 0)));
+
 const NAT_LANGUAGES = ["English", "Chinese", "Spanish", "French"];
 const PROG_LANGUAGES = ["Python", "TypeScript", "Rust", "Java"];
 
@@ -63,27 +100,68 @@ const PROG_LANG_DATA = [
   { name: "Qwen 2.5 Coder 32B", tokens: "0.4B tokens" },
 ];
 
-const CONTEXT_DIST = [
-  { label: "<1K Tokens", pct: "32%" },
-  { label: "1K - 4K", pct: "41%" },
-  { label: "4K - 16K", pct: "18%" },
-  { label: "16K - 64K", pct: "7%" },
-  { label: ">64K Tokens", pct: "2%" },
+
+// Market Share - 100% stacked bar chart by provider
+const PROVIDER_COLORS: Record<string, string> = {
+  google: "#4285F4",
+  openai: "#FF6B35",
+  "x-ai": "#7C4DFF",
+  anthropic: "#00BFA5",
+  meta: "#E91E63",
+  qwen: "#FF69B4",
+  mistralai: "#42A5F5",
+  "z-ai": "#689F38",
+  deepseek: "#FF9800",
+  others: "#9E9E9E",
+};
+
+const PROVIDER_RANKINGS = [
+  { rank: 1, name: "google", tokens: "1.32T", pct: "22.8%" },
+  { rank: 2, name: "openai", tokens: "940B", pct: "16.2%" },
+  { rank: 3, name: "x-ai", tokens: "864B", pct: "14.9%" },
+  { rank: 4, name: "anthropic", tokens: "580B", pct: "10.0%" },
+  { rank: 5, name: "meta", tokens: "412B", pct: "7.1%" },
+  { rank: 6, name: "qwen", tokens: "264B", pct: "4.6%" },
+  { rank: 7, name: "mistralai", tokens: "247B", pct: "4.3%" },
+  { rank: 8, name: "z-ai", tokens: "136B", pct: "2.3%" },
 ];
 
-const TOOL_CALLS = [
-  { rank: 1, name: "GPT-4o", pct: "45%" },
-  { rank: 2, name: "Claude Sonnet 4", pct: "38%" },
-  { rank: 3, name: "Gemini 2.5 Pro", pct: "12%" },
-  { rank: 4, name: "Mistral Large", pct: "5%" },
-];
+function generateMarketShareData() {
+  const providers = Object.keys(PROVIDER_COLORS);
+  const weeks: { date: string; shares: { provider: string; share: number }[] }[] = [];
+  const startDate = new Date(2025, 2, 30);
 
-const IMAGE_PROCESSING = [
-  { rank: 1, name: "GPT-4o", pct: "51%" },
-  { rank: 2, name: "Gemini 2.5 Pro", pct: "24%" },
-  { rank: 3, name: "Claude Sonnet 4", pct: "19%" },
-  { rank: 4, name: "Claude Haiku 3.5", pct: "6%" },
-];
+  // Base shares that shift over time
+  const baseShares: Record<string, number> = {
+    google: 15, openai: 25, "x-ai": 5, anthropic: 18,
+    meta: 12, qwen: 3, mistralai: 6, "z-ai": 1, deepseek: 8, others: 7,
+  };
+
+  for (let w = 0; w < 52; w++) {
+    const d = new Date(startDate.getTime() + w * 7 * 86_400_000);
+    const label = `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`;
+
+    // Simulate market shifts
+    const shares = providers.map((p) => {
+      let base = baseShares[p];
+      if (p === "google") base += w * 0.15;
+      if (p === "x-ai") base += w * 0.2;
+      if (p === "openai") base -= w * 0.12;
+      if (p === "anthropic") base -= w * 0.05;
+      if (p === "meta") base -= w * 0.04;
+      return { provider: p, share: Math.max(1, base + (Math.random() - 0.5) * 3) };
+    });
+
+    // Normalize to 100%
+    const total = shares.reduce((s, x) => s + x.share, 0);
+    shares.forEach((s) => { s.share = (s.share / total) * 100; });
+
+    weeks.push({ date: label, shares });
+  }
+  return weeks;
+}
+
+const MARKET_SHARE_WEEKLY = generateMarketShareData();
 
 export const RankingsPage: React.FC<RankingsPageProps> = ({ className = "" }) => {
   const [activeNatLang, setActiveNatLang] = useState(0);
@@ -127,6 +205,228 @@ export const RankingsPage: React.FC<RankingsPageProps> = ({ className = "" }) =>
               </div>
             </div>
           ))}
+        </section>
+
+        {/* Top Models Stacked Bar Chart */}
+        <section className="bg-surface-container-lowest rounded-xl border border-outline-variant/10 shadow-sm p-8 space-y-4">
+          <div className="flex items-center gap-3">
+            <span
+              className="material-symbols-outlined text-on-surface-variant"
+              style={{ fontVariationSettings: "'wght' 300, 'opsz' 24" }}
+            >
+              bar_chart
+            </span>
+            <h2 className="text-2xl font-headline font-bold">Top Models</h2>
+          </div>
+          <p className="text-on-surface-variant text-sm">
+            Weekly usage of models across NexusAI
+          </p>
+
+          <div className="flex mt-4">
+            {/* Y-axis labels */}
+            <div className="flex flex-col justify-between text-xs text-on-surface-variant font-medium pr-3 py-1 shrink-0 w-12 text-right">
+              <span>{Math.round(MAX_WEEKLY_TOTAL / 1000)}T</span>
+              <span>{Math.round((MAX_WEEKLY_TOTAL * 0.75) / 1000)}T</span>
+              <span>{Math.round((MAX_WEEKLY_TOTAL * 0.5) / 1000)}T</span>
+              <span>{Math.round((MAX_WEEKLY_TOTAL * 0.25) / 1000)}T</span>
+              <span>0</span>
+            </div>
+
+            {/* Chart area */}
+            <div className="flex-1 relative">
+              {/* Grid lines */}
+              <div className="absolute inset-0 flex flex-col justify-between pointer-events-none">
+                {[0, 1, 2, 3, 4].map((i) => (
+                  <div key={i} className="border-t border-outline-variant/15 w-full" />
+                ))}
+              </div>
+
+              {/* Bars */}
+              <div className="flex items-end gap-[2px] h-[360px] relative z-10">
+                {WEEKLY_DATA.map((week) => {
+                  const total = week.segments.reduce((s, seg) => s + seg.value, 0);
+                  return (
+                    <div
+                      key={week.date}
+                      className="flex-1 flex flex-col-reverse min-w-0 group relative"
+                      style={{ height: "100%" }}
+                    >
+                      {week.segments.map((seg) => {
+                        const heightPct = (seg.value / MAX_WEEKLY_TOTAL) * 100;
+                        return (
+                          <div
+                            key={seg.model}
+                            style={{
+                              height: `${heightPct}%`,
+                              backgroundColor: MODEL_COLORS[seg.model],
+                            }}
+                            className="min-h-0 transition-opacity group-hover:opacity-80"
+                          />
+                        );
+                      })}
+                      {/* Tooltip popover */}
+                      <div className="absolute top-0 left-1/2 -translate-x-1/2 hidden group-hover:block z-20 pointer-events-none">
+                        <div className="bg-white rounded-xl shadow-xl border border-slate-200 py-3 w-56">
+                          {/* Date badge */}
+                          <div className="px-4 pb-2.5 mb-1 border-b border-slate-100">
+                            <span className="inline-block text-xs font-semibold text-on-surface bg-surface-container-low px-2.5 py-1 rounded-full">
+                              {week.date}
+                            </span>
+                          </div>
+                          {/* Model breakdown - sorted by value desc */}
+                          <div className="px-4 space-y-2 py-1 max-h-[280px] overflow-y-auto">
+                            {[...week.segments]
+                              .sort((a, b) => b.value - a.value)
+                              .slice(0, 10)
+                              .map((seg) => (
+                                <div key={seg.model} className="flex items-center gap-2">
+                                  <div
+                                    className="w-1 h-5 rounded-full shrink-0"
+                                    style={{ backgroundColor: MODEL_COLORS[seg.model] }}
+                                  />
+                                  <span className="text-sm text-on-surface truncate flex-1">{seg.model}</span>
+                                </div>
+                              ))}
+                          </div>
+                          {/* Total */}
+                          <div className="px-4 pt-2.5 mt-1 border-t border-slate-100">
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm font-semibold text-on-surface">Total</span>
+                              <span className="text-sm font-bold text-on-surface">{(total / 1000).toFixed(1)}T</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* X-axis labels */}
+              <div className="flex justify-between mt-2 text-[10px] text-on-surface-variant">
+                {WEEKLY_DATA.filter((_, i) => i % 8 === 0).map((week) => (
+                  <span key={week.date}>{week.date}</span>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Legend */}
+          <div className="flex flex-wrap gap-x-4 gap-y-2 pt-4 border-t border-outline-variant/15">
+            {Object.entries(MODEL_COLORS).map(([model, color]) => (
+              <div key={model} className="flex items-center gap-1.5">
+                <div className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ backgroundColor: color }} />
+                <span className="text-xs text-on-surface-variant">{model}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Market Share - 100% Stacked Bar Chart */}
+        <section className="bg-surface-container-lowest rounded-xl border border-outline-variant/10 shadow-sm p-8 space-y-4">
+          <div className="flex items-center gap-3">
+            <span
+              className="material-symbols-outlined text-on-surface-variant"
+              style={{ fontVariationSettings: "'wght' 300, 'opsz' 24" }}
+            >
+              stacked_bar_chart
+            </span>
+            <h2 className="text-2xl font-headline font-bold">Market Share</h2>
+          </div>
+          <p className="text-on-surface-variant text-sm">
+            Compare NexusAI token share by model author
+          </p>
+
+          <div className="flex mt-4">
+            {/* Y-axis */}
+            <div className="flex flex-col justify-between text-xs text-on-surface-variant font-medium pr-3 py-1 shrink-0 w-12 text-right">
+              <span>100%</span>
+              <span>60%</span>
+              <span>30%</span>
+              <span>0%</span>
+            </div>
+
+            {/* Chart */}
+            <div className="flex-1 relative">
+              {/* Grid lines */}
+              <div className="absolute inset-0 flex flex-col justify-between pointer-events-none">
+                {[0, 1, 2, 3].map((i) => (
+                  <div key={i} className="border-t border-outline-variant/15 w-full" />
+                ))}
+              </div>
+
+              {/* Bars - each bar fills 100% height, segments are proportional */}
+              <div className="flex gap-[1px] h-[360px] relative z-10">
+                {MARKET_SHARE_WEEKLY.map((week) => (
+                  <div
+                    key={week.date}
+                    className="flex-1 flex flex-col min-w-0 group relative"
+                  >
+                    {week.shares.map((s) => (
+                      <div
+                        key={s.provider}
+                        style={{
+                          height: `${s.share}%`,
+                          backgroundColor: PROVIDER_COLORS[s.provider],
+                        }}
+                        className="min-h-0 transition-opacity group-hover:opacity-80"
+                      />
+                    ))}
+                    {/* Tooltip */}
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 hidden group-hover:block z-20 pointer-events-none">
+                      <div className="bg-white rounded-xl shadow-xl border border-slate-200 py-3 w-52">
+                        <div className="px-4 pb-2.5 mb-1 border-b border-slate-100">
+                          <span className="inline-block text-xs font-semibold text-on-surface bg-surface-container-low px-2.5 py-1 rounded-full">
+                            {week.date}
+                          </span>
+                        </div>
+                        <div className="px-4 space-y-2 py-1">
+                          {[...week.shares]
+                            .sort((a, b) => b.share - a.share)
+                            .slice(0, 8)
+                            .map((s) => (
+                              <div key={s.provider} className="flex items-center gap-2">
+                                <div
+                                  className="w-1 h-5 rounded-full shrink-0"
+                                  style={{ backgroundColor: PROVIDER_COLORS[s.provider] }}
+                                />
+                                <span className="text-sm text-on-surface flex-1">{s.provider}</span>
+                                <span className="text-xs text-on-surface-variant font-medium">{s.share.toFixed(1)}%</span>
+                              </div>
+                            ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* X-axis */}
+              <div className="flex justify-between mt-2 text-[10px] text-on-surface-variant">
+                {MARKET_SHARE_WEEKLY.filter((_, i) => i % 8 === 0).map((week) => (
+                  <span key={week.date}>{week.date}</span>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Provider ranking legend - 2 columns */}
+          <div className="grid grid-cols-2 gap-x-8 gap-y-4 pt-6 border-t border-outline-variant/15">
+            {PROVIDER_RANKINGS.map((p) => (
+              <div key={p.name} className="flex items-center gap-3">
+                <span className="text-sm text-on-surface-variant w-6 text-right">{p.rank}.</span>
+                <div
+                  className="w-3 h-3 rounded-full shrink-0"
+                  style={{ backgroundColor: PROVIDER_COLORS[p.name] }}
+                />
+                <span className="text-sm font-medium text-on-surface flex-1">{p.name}</span>
+                <div className="text-right">
+                  <div className="text-sm font-semibold text-on-surface">{p.tokens}</div>
+                  <div className="text-xs text-on-surface-variant">{p.pct}</div>
+                </div>
+              </div>
+            ))}
+          </div>
         </section>
 
         {/* Top Models Table */}
@@ -309,75 +609,6 @@ export const RankingsPage: React.FC<RankingsPageProps> = ({ className = "" }) =>
           </section>
         </div>
 
-        {/* Context Length Distribution */}
-        <section className="space-y-8">
-          <h2 className="text-2xl font-headline font-bold">Context Length Distribution</h2>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-            {CONTEXT_DIST.map((item) => (
-              <div key={item.label} className="bg-surface-container-low p-6 rounded-xl space-y-4">
-                <div className="text-on-surface-variant text-xs font-bold uppercase tracking-wider">
-                  {item.label}
-                </div>
-                <div className="text-2xl font-headline font-bold">{item.pct}</div>
-                <div className="w-full bg-surface-container-high h-1.5 rounded-full overflow-hidden">
-                  <div className="bg-primary h-full" style={{ width: item.pct }} />
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* Tool Calls & Images */}
-        <section className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div className="bg-surface-container-lowest p-8 rounded-xl border border-outline-variant/10 shadow-sm space-y-6">
-            <div className="flex justify-between items-start">
-              <div className="space-y-1">
-                <h3 className="text-xl font-headline font-bold">Tool/Function Calls</h3>
-                <p className="text-on-surface-variant text-sm font-medium">
-                  1.2M automated actions / day
-                </p>
-              </div>
-              <span className="material-symbols-outlined text-primary bg-primary/10 p-2 rounded-lg">
-                integration_instructions
-              </span>
-            </div>
-            <div className="space-y-4">
-              {TOOL_CALLS.map((item) => (
-                <div key={item.rank} className="flex items-center gap-4">
-                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-surface-container flex items-center justify-center font-bold text-xs">
-                    {item.rank}
-                  </div>
-                  <div className="flex-grow font-medium">{item.name}</div>
-                  <div className="text-primary font-bold">{item.pct}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="bg-surface-container-lowest p-8 rounded-xl border border-outline-variant/10 shadow-sm space-y-6">
-            <div className="flex justify-between items-start">
-              <div className="space-y-1">
-                <h3 className="text-xl font-headline font-bold">Image Processing</h3>
-                <p className="text-on-surface-variant text-sm font-medium">
-                  680K visual inputs / day
-                </p>
-              </div>
-              <span className="material-symbols-outlined text-primary bg-primary/10 p-2 rounded-lg">
-                image
-              </span>
-            </div>
-            <div className="space-y-4">
-              {IMAGE_PROCESSING.map((item) => (
-                <div key={item.rank} className="flex items-center gap-4">
-                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-surface-container flex items-center justify-center font-bold text-xs">
-                    {item.rank}
-                  </div>
-                  <div className="flex-grow font-medium">{item.name}</div>
-                  <div className="text-primary font-bold">{item.pct}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
       </main>
 
       <Footer />

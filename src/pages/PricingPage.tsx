@@ -1,68 +1,100 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Navbar } from "../components/Navbar";
 import { Footer } from "../components/Footer";
+import { LoginModal } from "../components/LoginModal";
+import { useAuth } from "../hooks/useAuth";
 
 interface PricingPageProps {
   readonly className?: string;
 }
 
 const FREE_FEATURES = [
-  { icon: "check_circle", text: "50 free requests/day", included: true },
-  { icon: "check_circle", text: "economy models", included: true },
-  { icon: "check_circle", text: "community support", included: true },
-  { icon: "check_circle", text: "basic analytics", included: true },
-  { icon: "close", text: "No priority routing", included: false },
-  { icon: "close", text: "No SLA", included: false },
+  { text: "50 requests/day", included: true },
+  { text: "25+ free models", included: true },
+  { text: "4 providers", included: true },
+  { text: "Community support", included: true },
+  { text: "Basic dashboard", included: true },
+  { text: "Priority routing", included: false },
+  { text: "BYOK", included: false },
+  { text: "SLA", included: false },
 ];
 
 const PAYG_FEATURES = [
-  { icon: "verified", text: "Unlimited requests" },
-  { icon: "verified", text: "all 300+ models" },
-  { icon: "verified", text: "priority routing" },
-  { icon: "verified", text: "auto top-up" },
-  { icon: "verified", text: "advanced analytics" },
-  { icon: "verified", text: "email support" },
+  "Platform fee: 4%",
+  "Unlimited requests",
+  "300+ models",
+  "60+ providers",
+  "Priority routing",
+  "Auto top-up",
+  "Advanced analytics",
+  "Email support",
+  "BYOK: 1M free requests/month, 4% after",
+  "No minimum spend, no lock-in",
 ];
 
 const ENTERPRISE_FEATURES = [
-  { icon: "corporate_fare", text: "Volume discounts" },
-  { icon: "corporate_fare", text: "dedicated account manager" },
-  { icon: "corporate_fare", text: "99.9% SLA" },
-  { icon: "corporate_fare", text: "SSO & RBAC" },
-  { icon: "corporate_fare", text: "custom data policies" },
-  { icon: "corporate_fare", text: "on-prem deployment" },
+  "Volume discounts",
+  "Dedicated account manager",
+  "99.9% SLA",
+  "SSO & RBAC",
+  "Custom data policies",
+  "BYOK: 5M free requests/month, custom pricing",
+  "Shared Slack support channel",
 ];
 
 const FAQ_ITEMS = [
   {
     question: "How does pay-as-you-go billing work?",
     answer:
-      "You deposit credits into your account and pay per token used. Set up auto top-up to never run out of credits during critical tasks. We provide real-time monitoring of your credit usage through the dashboard.",
+      "You deposit credits into your account and pay per token used. Set up auto top-up to never run out. Platform fee is 4% of each transaction. No minimum spend required.",
   },
   {
     question: "Can I use my own API keys (BYOK)?",
     answer:
-      "Yes, NexusAI supports Bring Your Own Key (BYOK) mode. You can connect your existing API keys from providers like OpenAI, Anthropic, and Google to route requests through our platform while maintaining your own billing relationship.",
+      "Yes. Bring your own API keys from OpenAI, Anthropic, Google and others. Pay-as-you-go accounts get 1M free requests/month with BYOK, 4% fee after that.",
   },
   {
     question: "Is the API compatible with OpenAI's SDK?",
     answer:
-      "Absolutely. NexusAI is fully OpenAI-compatible. Just change the base_url and api_key in your existing OpenAI SDK setup to access 300+ models from all providers.",
+      "Yes, NexusAI is fully OpenAI-compatible. Just change the base URL and API key \u2014 no other code changes needed.",
   },
   {
     question: "What happens if a model provider goes down?",
     answer:
-      "NexusAI automatically routes your requests to alternative providers with equivalent models. Our smart routing ensures 99.9% uptime even when individual providers experience outages.",
+      "We automatically route to backup providers with no interruption. You can also configure your own fallback chain.",
   },
   {
     question: "Do you store my prompts or responses?",
     answer:
-      "By default, we do not store your prompts or responses. You can opt-in to logging for debugging purposes, but all data is encrypted at rest and in transit. Enterprise plans include additional data governance controls.",
+      "No. By default we don't store your prompts. You can enable logging in your dashboard for debugging purposes.",
   },
 ];
 
 export const PricingPage: React.FC<PricingPageProps> = ({ className = "" }) => {
   const [expandedFaq, setExpandedFaq] = useState<number>(0);
+  const [showLogin, setShowLogin] = useState(false);
+  const [loginRedirect, setLoginRedirect] = useState<string>("/");
+  const { isLoggedIn, login } = useAuth();
+  const navigate = useNavigate();
+
+  const handlePlanClick = useCallback(
+    (redirectPath: string) => {
+      if (isLoggedIn) {
+        navigate(redirectPath);
+      } else {
+        setLoginRedirect(redirectPath);
+        setShowLogin(true);
+      }
+    },
+    [isLoggedIn, navigate],
+  );
+
+  const handleLogin = useCallback(() => {
+    login();
+    setShowLogin(false);
+    navigate(loginRedirect);
+  }, [login, navigate, loginRedirect]);
 
   return (
     <div className={`bg-background text-on-background font-body ${className}`}>
@@ -75,7 +107,9 @@ export const PricingPage: React.FC<PricingPageProps> = ({ className = "" }) => {
             Simple, transparent pricing
           </h1>
           <p className="text-lg md:text-xl text-on-surface-variant max-w-2xl mx-auto leading-relaxed">
-            Pay only for what you use. No hidden fees, no commitments. Start free and scale as you grow.
+            <strong className="text-on-surface">4% platform fee</strong> — lower than industry standard.
+            <br />
+            Pay only for what you use. No minimum spend, no lock-in.
           </p>
         </section>
 
@@ -109,15 +143,20 @@ export const PricingPage: React.FC<PricingPageProps> = ({ className = "" }) => {
                         feature.included ? "text-primary" : ""
                       }`}
                     >
-                      {feature.icon}
+                      {feature.included ? "check_circle" : "close"}
                     </span>
                     {feature.text}
                   </li>
                 ))}
               </ul>
-              <button className="w-full py-3 px-6 rounded-lg bg-surface-container-high text-primary font-semibold text-sm transition-all hover:bg-surface-container-highest active:scale-[0.98]">
-                Get Started
-              </button>
+              {!isLoggedIn && (
+                <button
+                  onClick={() => handlePlanClick("/")}
+                  className="w-full py-3 px-6 rounded-lg bg-surface-container-high text-primary font-semibold text-sm transition-all hover:bg-surface-container-highest active:scale-[0.98]"
+                >
+                  Get Started
+                </button>
+              )}
             </div>
 
             {/* Pay As You Go Plan */}
@@ -138,21 +177,29 @@ export const PricingPage: React.FC<PricingPageProps> = ({ className = "" }) => {
                 </p>
               </div>
               <ul className="flex-grow space-y-4 mb-8">
-                {PAYG_FEATURES.map((feature) => (
-                  <li key={feature.text} className="flex items-center gap-3 text-sm text-on-surface">
+                {PAYG_FEATURES.map((text) => (
+                  <li key={text} className="flex items-center gap-3 text-sm text-on-surface">
                     <span
                       className="material-symbols-outlined text-primary text-xl"
                       style={{ fontVariationSettings: "'FILL' 1" }}
                     >
-                      {feature.icon}
+                      verified
                     </span>
-                    {feature.text}
+                    {text}
                   </li>
                 ))}
               </ul>
-              <button className="w-full py-3 px-6 rounded-lg bg-gradient-to-r from-primary to-primary-container text-on-primary font-semibold text-sm shadow-md hover:shadow-lg transition-all active:scale-[0.98]">
-                Start Building
-              </button>
+              <p className="text-xs text-on-surface-variant text-center mb-4 leading-relaxed">
+                $5 minimum deposit · Unused credits never expire · Refundable within 24 hours
+              </p>
+              {!isLoggedIn && (
+                <button
+                  onClick={() => handlePlanClick("/settings/credits")}
+                  className="w-full py-3 px-6 rounded-lg bg-gradient-to-r from-primary to-primary-container text-on-primary font-semibold text-sm shadow-md hover:shadow-lg transition-all active:scale-[0.98]"
+                >
+                  Start Building
+                </button>
+              )}
             </div>
 
             {/* Enterprise Plan */}
@@ -165,16 +212,16 @@ export const PricingPage: React.FC<PricingPageProps> = ({ className = "" }) => {
                   <span className="text-4xl font-extrabold font-headline text-on-surface">Custom</span>
                 </div>
                 <p className="mt-4 text-on-surface-variant text-sm leading-relaxed">
-                  Volume discounts, dedicated support, and custom deployment.
+                  Volume discounts, dedicated support, and custom SLAs for your team.
                 </p>
               </div>
               <ul className="flex-grow space-y-4 mb-8">
-                {ENTERPRISE_FEATURES.map((feature) => (
-                  <li key={feature.text} className="flex items-center gap-3 text-sm text-on-surface">
+                {ENTERPRISE_FEATURES.map((text) => (
+                  <li key={text} className="flex items-center gap-3 text-sm text-on-surface">
                     <span className="material-symbols-outlined text-primary text-xl">
-                      {feature.icon}
+                      corporate_fare
                     </span>
-                    {feature.text}
+                    {text}
                   </li>
                 ))}
               </ul>
@@ -216,7 +263,7 @@ export const PricingPage: React.FC<PricingPageProps> = ({ className = "" }) => {
           </div>
         </section>
 
-        {/* Visual Anchor (Asymmetric Bento Element) */}
+        {/* Bottom CTA */}
         <section className="max-w-7xl mx-auto px-6 mt-32 grid grid-cols-1 md:grid-cols-12 gap-6 h-auto md:h-80">
           <div className="md:col-span-8 relative rounded-2xl overflow-hidden bg-slate-900 group">
             <img
@@ -246,15 +293,25 @@ export const PricingPage: React.FC<PricingPageProps> = ({ className = "" }) => {
             <div>
               <h4 className="text-2xl font-headline font-bold mb-2">Ready to scale?</h4>
               <p className="text-blue-100 text-sm mb-6">
-                Join 10,000+ developers building the future of AI on NexusAI.
+                No minimum spend. Start for free, scale when ready.
               </p>
-              <button className="bg-white text-primary px-6 py-3 rounded-lg font-bold text-sm hover:bg-blue-50 transition-colors">
-                Create Account
-              </button>
+              <Link
+                to="/settings/api-keys"
+                className="inline-block bg-white text-primary px-6 py-3 rounded-lg font-bold text-sm hover:bg-blue-50 transition-colors"
+              >
+                Get API Key
+              </Link>
             </div>
           </div>
         </section>
       </main>
+
+      {/* Login Modal */}
+      <LoginModal
+        isOpen={showLogin}
+        onClose={() => setShowLogin(false)}
+        onLogin={handleLogin}
+      />
 
       <Footer />
     </div>

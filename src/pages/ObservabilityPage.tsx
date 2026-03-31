@@ -21,9 +21,9 @@ const DESTINATIONS = [
 export default function ObservabilityPage({ className }: ObservabilityPageProps) {
   return (
     <SettingsLayout activeTab="observability" className={className}>
-      <div className="flex-1 p-10 max-w-6xl w-full mx-auto overflow-y-auto">
+      <div className="flex-1 p-4 sm:p-6 md:p-10 max-w-6xl w-full mx-auto overflow-y-auto">
         <header className="mb-8">
-          <h2 className="text-3xl font-bold font-headline tracking-tight mb-2">
+          <h2 className="text-2xl sm:text-3xl font-bold font-headline tracking-tight mb-2">
             Observability
           </h2>
           <p className="text-on-surface-variant text-sm">
@@ -34,12 +34,12 @@ export default function ObservabilityPage({ className }: ObservabilityPageProps)
 
         {/* Broadcast Section Card */}
         <section className="mb-12">
-          <div className="bg-surface-container-low rounded-xl p-8 border-none relative overflow-hidden group">
+          <div className="bg-surface-container-low rounded-xl p-6 sm:p-8 relative overflow-hidden group">
             {/* Glassy Accent */}
             <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -mr-32 -mt-32" />
             <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div className="flex items-start gap-5">
-                <div className="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center">
+                <div className="w-14 h-14 bg-primary/8 rounded-xl flex items-center justify-center">
                   <span
                     className="material-symbols-outlined text-primary text-3xl"
                     style={{ fontVariationSettings: "'FILL' 1" }}
@@ -58,7 +58,7 @@ export default function ObservabilityPage({ className }: ObservabilityPageProps)
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-4 bg-surface-container-lowest px-4 py-2.5 rounded-lg shadow-sm">
+              <div className="flex items-center gap-4 bg-surface-container-lowest px-4 py-2.5 rounded-lg">
                 <span className="text-xs font-semibold tracking-wider text-primary uppercase">
                   Enabled
                 </span>
@@ -81,28 +81,29 @@ export default function ObservabilityPage({ className }: ObservabilityPageProps)
               Available Destinations
             </h3>
             <div className="h-px flex-1 bg-outline-variant/20 mx-6" />
-            <span className="text-[0.75rem] font-medium text-slate-400">11 Integrations</span>
+            <span className="text-[0.75rem] font-medium text-on-surface-variant">11 Integrations</span>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {DESTINATIONS.map((dest) => (
+          <div className="rounded-xl overflow-hidden bg-surface-container-lowest">
+            {DESTINATIONS.map((dest, i) => (
               <div
                 key={dest.name}
-                className="bg-surface-container-lowest p-5 rounded-xl flex items-center justify-between group hover:bg-slate-50 transition-all duration-200 hover:translate-y-[-2px] hover:shadow-[0px_12px_32px_rgba(25,28,30,0.04)] border border-outline-variant/10"
+                className={`flex items-center justify-between px-5 py-3.5 hover:bg-surface-container/40 transition-colors ${i < DESTINATIONS.length - 1 ? "border-b border-outline-variant/10" : ""}`}
               >
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center p-2 overflow-hidden">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-lg bg-surface-container flex items-center justify-center p-1.5 overflow-hidden">
                     <img
                       alt={dest.name}
                       className="w-full h-full object-contain"
                       src={dest.logo}
                     />
                   </div>
-                  <span className="font-semibold text-sm text-on-surface tracking-tight">
+                  <span className="font-medium text-sm text-on-surface">
                     {dest.name}
                   </span>
                 </div>
-                <button className="px-3 py-1.5 text-[0.7rem] font-bold text-primary hover:bg-primary/5 rounded-md transition-colors flex items-center gap-1">
-                  Add Destination <span className="text-lg">+</span>
+                <button className="flex items-center gap-1.5 text-sm text-on-surface-variant hover:text-primary transition-colors">
+                  Add Destination
+                  <span className="material-symbols-outlined text-[18px]">add</span>
                 </button>
               </div>
             ))}
