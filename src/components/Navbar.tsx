@@ -64,7 +64,7 @@ export const Navbar: React.FC<NavbarProps> = ({ className = "" }) => {
   return (
     <>
       <nav className={`fixed top-0 w-full z-50 bg-surface-container-lowest/80 backdrop-blur-md border-b border-outline-variant/10 ${className}`}>
-        <div className="flex items-center justify-between px-6 h-16 max-w-7xl mx-auto">
+        <div className="flex items-center justify-between px-4 sm:px-6 h-14 sm:h-16 max-w-7xl mx-auto">
           <div className="flex items-center gap-2">
             <button
               type="button"
@@ -109,7 +109,7 @@ export const Navbar: React.FC<NavbarProps> = ({ className = "" }) => {
               </button>
 
               {showUserMenu && (
-                <div className="absolute right-0 top-full mt-2 w-64 bg-surface-container-lowest rounded-xl shadow-[0px_4px_20px_rgba(0,0,0,0.04),0px_12px_40px_rgba(0,0,0,0.08)] overflow-hidden z-[100]">
+                <div className="absolute right-0 top-full mt-2 w-64 bg-surface-container-lowest rounded-xl shadow-[0px_4px_20px_rgba(0,0,0,0.04),0px_12px_40px_rgba(0,0,0,0.08)] overflow-hidden overflow-y-auto max-h-[calc(100vh-5rem)] z-[100]">
                   {/* Header */}
                   <div className="p-3 bg-surface-container-low flex items-center gap-3">
                     <div className="w-9 h-9 rounded-full bg-gradient-to-br from-rose-600 to-rose-800 text-white flex items-center justify-center text-xs font-bold ring-2 ring-white shadow-sm">
@@ -200,23 +200,23 @@ export const Navbar: React.FC<NavbarProps> = ({ className = "" }) => {
               )}
             </div>
           ) : (
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
               <button
                 onClick={() => i18n.changeLanguage(i18n.language.startsWith("zh") ? "en" : "zh")}
-                className="text-on-surface-variant hover:text-on-surface transition-colors text-sm font-medium"
+                className="text-on-surface-variant hover:text-on-surface transition-colors text-xs sm:text-sm font-medium"
                 title={t("userMenu.language")}
               >
                 {i18n.language.startsWith("zh") ? "EN" : "中文"}
               </button>
               <button
                 onClick={() => setShowLogin(true)}
-                className="text-on-surface-variant hover:text-on-surface transition-colors text-sm font-medium"
+                className="text-on-surface-variant hover:text-on-surface transition-colors text-xs sm:text-sm font-medium"
               >
                 {t("common.sign_in")}
               </button>
               <Link
                 to="/settings/api-keys"
-                className="bg-primary-container text-on-primary px-5 py-2.5 rounded-lg text-sm font-semibold hover:opacity-90 active:scale-95 duration-150 transition-all"
+                className="bg-primary-container text-on-primary px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-semibold hover:opacity-90 active:scale-95 duration-150 transition-all"
               >
                 {t("common.get_api_key")}
               </Link>

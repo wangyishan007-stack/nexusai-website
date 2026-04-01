@@ -301,6 +301,7 @@ export const ModelsExplorerPage: React.FC<ModelsExplorerPageProps> = ({
   const { theme, setTheme } = useTheme();
   const [showLogin, setShowLogin] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showMobileNav, setShowMobileNav] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   const handleLogin = useCallback(() => {
@@ -351,10 +352,21 @@ export const ModelsExplorerPage: React.FC<ModelsExplorerPageProps> = ({
     <div className={`bg-surface text-on-surface antialiased h-screen flex flex-col overflow-hidden ${className}`}>
       {/* Inline header matching shared Navbar style */}
       <header className="shrink-0 bg-surface-container-lowest/80 backdrop-blur-md border-b border-outline-variant/10 relative z-50">
-        <div className="flex items-center justify-between px-6 h-16 max-w-7xl mx-auto">
-          <Link to="/" className="text-2xl font-extrabold tracking-tight text-on-surface font-headline">
-            NexusAI
-          </Link>
+        <div className="flex items-center justify-between px-4 sm:px-6 h-14 sm:h-16 max-w-7xl mx-auto">
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setShowMobileNav((prev) => !prev)}
+              className="md:hidden p-1.5 rounded-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors"
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: 22 }}>
+                {showMobileNav ? "close" : "menu"}
+              </span>
+            </button>
+            <Link to="/" className="text-xl sm:text-2xl font-extrabold tracking-tight text-on-surface font-headline">
+              NexusAI
+            </Link>
+          </div>
           <div className="hidden md:flex items-center gap-8">
             {visibleLinks.map((link) => {
               const isActive = pathname.startsWith(link.href);
@@ -384,7 +396,7 @@ export const ModelsExplorerPage: React.FC<ModelsExplorerPageProps> = ({
                 ) : "WX"}
               </button>
               {showUserMenu && (
-                <div className="absolute right-0 top-full mt-2 w-64 bg-surface-container-lowest rounded-xl shadow-[0px_4px_20px_rgba(0,0,0,0.04),0px_12px_40px_rgba(0,0,0,0.08)] overflow-hidden z-[100]">
+                <div className="absolute right-0 top-full mt-2 w-64 bg-surface-container-lowest rounded-xl shadow-[0px_4px_20px_rgba(0,0,0,0.04),0px_12px_40px_rgba(0,0,0,0.08)] overflow-hidden overflow-y-auto max-h-[calc(100vh-5rem)] z-[100]">
                   <div className="p-3 bg-surface-container-low flex items-center gap-3">
                     <div className="w-9 h-9 rounded-full bg-gradient-to-br from-rose-600 to-rose-800 text-white flex items-center justify-center text-xs font-bold ring-2 ring-white shadow-sm">
                       {walletAddress ? (
@@ -465,22 +477,44 @@ export const ModelsExplorerPage: React.FC<ModelsExplorerPageProps> = ({
               )}
             </div>
           ) : (
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
               <button
                 onClick={() => i18n.changeLanguage(i18n.language.startsWith("zh") ? "en" : "zh")}
-                className="text-on-surface-variant hover:text-on-surface transition-colors text-sm font-medium"
+                className="text-on-surface-variant hover:text-on-surface transition-colors text-xs sm:text-sm font-medium"
               >
                 {i18n.language.startsWith("zh") ? "EN" : "中文"}
               </button>
-              <button onClick={() => setShowLogin(true)} className="text-on-surface-variant hover:text-on-surface transition-colors text-sm font-medium">
+              <button onClick={() => setShowLogin(true)} className="text-on-surface-variant hover:text-on-surface transition-colors text-xs sm:text-sm font-medium">
                 {t("common.sign_in")}
               </button>
-              <Link to="/settings/api-keys" className="bg-primary-container text-on-primary px-5 py-2.5 rounded-lg text-sm font-semibold hover:opacity-90 active:scale-95 duration-150 transition-all">
+              <Link to="/settings/api-keys" className="bg-primary-container text-on-primary px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-semibold hover:opacity-90 active:scale-95 duration-150 transition-all">
                 {t("common.get_api_key")}
               </Link>
             </div>
           )}
         </div>
+        {/* Mobile nav dropdown */}
+        {showMobileNav && (
+          <div className="md:hidden border-t border-outline-variant/10 px-4 py-3 flex flex-col gap-1 bg-surface-container-lowest/95 backdrop-blur-md">
+            {visibleLinks.map((link) => {
+              const isActive = pathname.startsWith(link.href);
+              return (
+                <Link
+                  key={link.labelKey}
+                  to={link.href}
+                  onClick={() => setShowMobileNav(false)}
+                  className={`px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                    isActive
+                      ? "text-primary bg-primary/5"
+                      : "text-on-surface-variant hover:text-on-surface hover:bg-surface-container"
+                  }`}
+                >
+                  {t(link.labelKey)}
+                </Link>
+              );
+            })}
+          </div>
+        )}
       </header>
 
       <LoginModal isOpen={showLogin} onClose={() => setShowLogin(false)} onLogin={handleLogin} />
