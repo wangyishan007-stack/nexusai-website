@@ -23,7 +23,7 @@ const TIMEZONE_OPTIONS = [
 
 export default function PreferencesPage() {
   const { t, i18n } = useTranslation();
-  const { theme, setTheme, resolved } = useTheme();
+  const { setTheme, resolved } = useTheme();
   const darkMode = resolved === "dark";
   const [compactLayout, setCompactLayout] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);

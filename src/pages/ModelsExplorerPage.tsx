@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { NAV_LINKS } from "../data/mockData";
 import { useAuth } from "../hooks/useAuth";
+import { useTheme } from "../contexts/ThemeContext";
 import { LoginModal } from "../components/LoginModal";
 
 /* Navbar import removed – this page uses an inline header for full-viewport containment */
@@ -297,6 +298,7 @@ export const ModelsExplorerPage: React.FC<ModelsExplorerPageProps> = ({
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const { isLoggedIn, login, logout, walletAddress, loginMethod, displayName } = useAuth();
+  const { theme, setTheme } = useTheme();
   const [showLogin, setShowLogin] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);

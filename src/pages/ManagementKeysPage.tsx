@@ -1,5 +1,4 @@
 import { useState, useCallback } from "react";
-import { useTranslation } from "react-i18next";
 import SettingsLayout from "../components/SettingsLayout";
 
 const MGMT_KEYS = [
@@ -38,7 +37,7 @@ const MGMT_KEYS = [
 ];
 
 
-const SCOPE_OPTIONS = [
+const _SCOPE_OPTIONS = [
   { label: "Full Access", desc: "Create, read, update, delete all resources", icon: "admin_panel_settings" },
   { label: "Read + Deploy", desc: "Read resources and trigger deployments", icon: "rocket_launch" },
   { label: "Read Only", desc: "View resources without modification rights", icon: "visibility" },

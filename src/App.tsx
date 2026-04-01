@@ -1,4 +1,7 @@
+import { useEffect } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
+import { useAccount, useDisconnect } from "wagmi";
+import { useAuth } from "./hooks/useAuth";
 
 // Landing page components
 import { Navbar } from "./components/Navbar";
@@ -20,6 +23,8 @@ import { RankingsPage } from "./pages/RankingsPage";
 import { ModelDetailPage } from "./pages/ModelDetailPage";
 import { AppsPage } from "./pages/AppsPage";
 import { DocsPage } from "./pages/DocsPage";
+import { ComparePage } from "./pages/ComparePage";
+import { ProviderPage } from "./pages/ProviderPage";
 
 // Settings pages (default exports)
 import ApiKeysPage from "./pages/ApiKeysPage";
@@ -54,7 +59,38 @@ function LandingPage() {
   );
 }
 
+/** Sync wagmi wallet state with useAuth on reconnect/disconnect */
+function useWalletSync() {
+  const { address, isConnected, isReconnecting, isConnecting } = useAccount();
+  const { disconnect } = useDisconnect();
+  const { walletAddress, loginMethod, loginWithWallet, logout } = useAuth();
+
+  // Auto-restore session when wagmi reconnects
+  useEffect(() => {
+    if (isConnected && address && !walletAddress) {
+      loginWithWallet(address);
+    }
+  }, [isConnected, address, walletAddress, loginWithWallet]);
+
+  // If wallet disconnects externally (e.g. from MetaMask), clear auth
+  // Guard: skip while wagmi is still initializing/reconnecting
+  useEffect(() => {
+    if (!isConnected && !isReconnecting && !isConnecting && loginMethod === "wallet" && walletAddress) {
+      logout();
+    }
+  }, [isConnected, isReconnecting, isConnecting, loginMethod, walletAddress, logout]);
+
+  // If auth logs out but wagmi is still connected, disconnect wagmi
+  useEffect(() => {
+    if (isConnected && !walletAddress && loginMethod === null) {
+      disconnect();
+    }
+  }, [isConnected, walletAddress, loginMethod, disconnect]);
+}
+
 function App() {
+  useWalletSync();
+
   return (
     <Routes>
       <Route path="/" element={<LandingPage />} />
@@ -63,6 +99,8 @@ function App() {
       <Route path="/models" element={<ModelsExplorerPage />} />
       <Route path="/models/expanded" element={<ModelsExplorerPage defaultFiltersExpanded />} />
       <Route path="/models/:id" element={<ModelDetailPage />} />
+      <Route path="/compare" element={<ComparePage />} />
+      <Route path="/providers/:providerId" element={<ProviderPage />} />
       <Route path="/rankings" element={<RankingsPage />} />
       <Route path="/apps" element={<AppsPage />} />
       <Route path="/docs" element={<DocsPage />} />

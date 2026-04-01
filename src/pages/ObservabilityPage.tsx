@@ -1,5 +1,4 @@
 import { useState, useCallback } from "react";
-import { useTranslation } from "react-i18next";
 import SettingsLayout from "../components/SettingsLayout";
 
 interface ObservabilityPageProps {
@@ -73,7 +72,7 @@ function DestinationDetailView({
   const [showFields, setShowFields] = useState<Record<string, boolean>>({});
   const [privacyMode, setPrivacyMode] = useState(false);
   const [samplingRate, setSamplingRate] = useState("1");
-  const [apiKeyFilter, setApiKeyFilter] = useState("");
+  const [_apiKeyFilter, _setApiKeyFilter] = useState("");
   const [apiKeyDropOpen, setApiKeyDropOpen] = useState(false);
   const [selectedApiKeys, setSelectedApiKeys] = useState<string[]>([]);
   const [testStatus, setTestStatus] = useState<"idle" | "loading" | "success" | "error">("idle");

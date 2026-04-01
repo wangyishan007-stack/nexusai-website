@@ -1,5 +1,4 @@
 import { useState, useCallback, useRef, useEffect } from "react";
-import { useTranslation } from "react-i18next";
 import SettingsLayout from "../components/SettingsLayout";
 
 const TABS = ["Generations", "Jobs", "Sessions"] as const;
@@ -274,7 +273,7 @@ export default function LogsPage() {
 
   const hasActiveFilters = filterModel !== "All" || filterProvider !== "All" || filterBilling !== "All" || filterModality !== "All" || filterSessionId !== "";
 
-  const clearFilters = useCallback(() => {
+  const _clearFilters = useCallback(() => {
     setFilterModel("All");
     setFilterProvider("All");
     setFilterBilling("All");

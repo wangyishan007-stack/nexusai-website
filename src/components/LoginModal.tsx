@@ -9,7 +9,7 @@ interface LoginModalProps {
   readonly isOpen: boolean;
   readonly onClose: () => void;
   readonly onLogin: () => void;
-  readonly onLoginWithWallet: (address: string) => void;
+  readonly onLoginWithWallet?: (address: string) => void;
 }
 
 export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLogin, onLoginWithWallet }) => {
