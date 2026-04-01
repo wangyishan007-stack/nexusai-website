@@ -200,7 +200,14 @@ export const Navbar: React.FC<NavbarProps> = ({ className = "" }) => {
               )}
             </div>
           ) : (
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => i18n.changeLanguage(i18n.language.startsWith("zh") ? "en" : "zh")}
+                className="text-on-surface-variant hover:text-on-surface transition-colors text-sm font-medium"
+                title={t("userMenu.language")}
+              >
+                {i18n.language.startsWith("zh") ? "EN" : "中文"}
+              </button>
               <button
                 onClick={() => setShowLogin(true)}
                 className="text-on-surface-variant hover:text-on-surface transition-colors text-sm font-medium"
