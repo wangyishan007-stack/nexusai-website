@@ -357,13 +357,13 @@ export const ModelsExplorerPage: React.FC<ModelsExplorerPageProps> = ({
             <button
               type="button"
               onClick={() => setShowMobileNav((prev) => !prev)}
-              className="md:hidden p-1.5 rounded-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors"
+              className="md:hidden p-1.5 rounded-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors flex items-center justify-center"
             >
-              <span className="material-symbols-outlined" style={{ fontSize: 22 }}>
+              <span className="material-symbols-outlined leading-none" style={{ fontSize: 22 }}>
                 {showMobileNav ? "close" : "menu"}
               </span>
             </button>
-            <Link to="/" className="text-2xl font-extrabold tracking-tight text-on-surface font-headline">
+            <Link to="/" className="text-2xl font-extrabold tracking-tight text-on-surface font-headline leading-none">
               NexusAI
             </Link>
           </div>
