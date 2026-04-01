@@ -37,12 +37,7 @@ const MGMT_KEYS = [
 ];
 
 
-const _SCOPE_OPTIONS = [
-  { label: "Full Access", desc: "Create, read, update, delete all resources", icon: "admin_panel_settings" },
-  { label: "Read + Deploy", desc: "Read resources and trigger deployments", icon: "rocket_launch" },
-  { label: "Read Only", desc: "View resources without modification rights", icon: "visibility" },
-  { label: "Billing Only", desc: "Access billing and usage data only", icon: "payments" },
-];
+/* SCOPE_OPTIONS reserved for future scope selector UI */
 
 export default function ManagementKeysPage() {
   const [keys, setKeys] = useState(MGMT_KEYS);

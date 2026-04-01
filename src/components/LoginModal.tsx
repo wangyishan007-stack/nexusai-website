@@ -45,7 +45,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLogin
       { connector: injected },
       {
         onSuccess: (data) => {
-          onLoginWithWallet(data.accounts[0]);
+          onLoginWithWallet?.(data.accounts[0]);
         },
         onError: (err) => {
           if (err.message?.includes("rejected")) {

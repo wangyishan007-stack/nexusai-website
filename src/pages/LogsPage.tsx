@@ -273,14 +273,6 @@ export default function LogsPage() {
 
   const hasActiveFilters = filterModel !== "All" || filterProvider !== "All" || filterBilling !== "All" || filterModality !== "All" || filterSessionId !== "";
 
-  const _clearFilters = useCallback(() => {
-    setFilterModel("All");
-    setFilterProvider("All");
-    setFilterBilling("All");
-    setFilterModality("All");
-    setFilterSessionId("");
-  }, []);
-
   useEffect(() => {
     if (!exportOpen) return;
     const handler = (e: MouseEvent) => {
