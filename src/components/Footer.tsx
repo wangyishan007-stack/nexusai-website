@@ -10,32 +10,33 @@ export const Footer: React.FC<FooterProps> = ({ className = "" }) => {
   const { t } = useTranslation();
   return (
     <footer className={`w-full pt-8 sm:pt-16 pb-6 sm:pb-8 bg-surface-container-low border-t border-outline-variant/10 ${className}`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-12 mb-8 sm:mb-16">
-        <div className="col-span-2 sm:col-span-2 md:col-span-1 space-y-3 sm:space-y-6">
+      {/* Link sections - hidden on mobile */}
+      <div className="hidden sm:grid max-w-7xl mx-auto px-6 grid-cols-2 md:grid-cols-4 gap-12 mb-16">
+        <div className="md:col-span-1 space-y-6">
           <Link to="/" className="text-xl font-bold text-on-surface font-headline">NexusAI</Link>
-          <p className="text-xs sm:text-sm text-on-surface-variant max-w-xs leading-relaxed">
+          <p className="text-sm text-on-surface-variant max-w-xs leading-relaxed">
             {t("footer.tagline")}
           </p>
         </div>
         {FOOTER_SECTIONS.map((section) => (
           <div key={section.titleKey}>
-            <h5 className="font-headline font-semibold uppercase tracking-widest text-[10px] sm:text-xs mb-3 sm:mb-6 text-on-surface">
+            <h5 className="font-headline font-semibold uppercase tracking-widest text-xs mb-6 text-on-surface">
               {t(section.titleKey)}
             </h5>
-            <ul className="space-y-2 sm:space-y-4">
+            <ul className="space-y-4">
               {section.links.map((link) => (
                 <li key={link.labelKey}>
                   {link.href.startsWith("/") ? (
                     <Link
                       to={link.href}
-                      className="text-xs sm:text-sm text-on-surface-variant hover:text-primary transition-colors"
+                      className="text-sm text-on-surface-variant hover:text-primary transition-colors"
                     >
                       {t(link.labelKey)}
                     </Link>
                   ) : (
                     <a
                       href={link.href}
-                      className="text-xs sm:text-sm text-on-surface-variant hover:text-primary transition-colors"
+                      className="text-sm text-on-surface-variant hover:text-primary transition-colors"
                     >
                       {t(link.labelKey)}
                     </a>
@@ -46,7 +47,7 @@ export const Footer: React.FC<FooterProps> = ({ className = "" }) => {
           </div>
         ))}
       </div>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 sm:pt-8 border-t border-outline-variant/10 flex flex-col md:flex-row justify-between items-center gap-4 sm:gap-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 sm:pt-8 sm:border-t border-outline-variant/10 flex flex-col md:flex-row justify-between items-center gap-4 sm:gap-6">
         <p className="text-xs sm:text-sm text-on-surface-variant">{t("footer.copyright")}</p>
         <div className="flex gap-4 sm:gap-8">
           <Link to="/docs" className="text-xs sm:text-sm text-on-surface-variant hover:text-primary transition-colors">{t("footer.privacyPolicy")}</Link>

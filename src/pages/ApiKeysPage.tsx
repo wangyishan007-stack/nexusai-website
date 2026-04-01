@@ -437,7 +437,7 @@ export default function ApiKeysPage({ className }: ApiKeysPageProps) {
         {/* Cards - Mobile */}
         <div className="md:hidden space-y-3">
           {keys.map((apiKey) => (
-            <div key={apiKey.fullKey} className="bg-surface-container-lowest rounded-xl p-4">
+            <div key={apiKey.fullKey} className="bg-surface-container-lowest rounded-xl p-4 relative">
               <div className="flex items-center justify-between mb-2">
                 <span className="font-semibold text-on-surface text-sm">{apiKey.name}</span>
                 <button
@@ -447,6 +447,33 @@ export default function ApiKeysPage({ className }: ApiKeysPageProps) {
                   <span className="material-symbols-outlined" style={{ fontSize: 20 }}>more_horiz</span>
                 </button>
               </div>
+              {/* Mobile context menu */}
+              {menuOpen === apiKey.fullKey && (
+                <div ref={menuRef} className="absolute right-4 top-12 w-44 bg-surface-container-lowest rounded-xl shadow-xl border border-outline-variant/20 py-1 z-50">
+                  <button
+                    className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm text-on-surface hover:bg-surface-container/60 transition-colors"
+                    onClick={() => { copyToClipboard(apiKey.fullKey, apiKey.fullKey); setMenuOpen(null); }}
+                  >
+                    <span className="material-symbols-outlined text-on-surface-variant" style={{ fontSize: 18 }}>content_copy</span>
+                    {t("apiKeys.copy_key")}
+                  </button>
+                  <button
+                    className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm text-on-surface hover:bg-surface-container/60 transition-colors"
+                    onClick={() => { setEditingKey(apiKey.fullKey); setEditName(apiKey.name); setMenuOpen(null); }}
+                  >
+                    <span className="material-symbols-outlined text-on-surface-variant" style={{ fontSize: 18 }}>edit</span>
+                    {t("apiKeys.rename")}
+                  </button>
+                  <div className="border-t border-outline-variant/10 my-1" />
+                  <button
+                    className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm text-error hover:bg-error/5 transition-colors"
+                    onClick={() => { setDeleteConfirm(apiKey.fullKey); setMenuOpen(null); }}
+                  >
+                    <span className="material-symbols-outlined" style={{ fontSize: 18 }}>delete</span>
+                    {t("apiKeys.delete")}
+                  </button>
+                </div>
+              )}
               <div className="flex items-center gap-2 mb-3">
                 <code className="bg-surface-container font-mono text-xs px-2 py-1 rounded text-on-surface-variant">
                   {apiKey.key}

@@ -363,7 +363,7 @@ export const ModelsExplorerPage: React.FC<ModelsExplorerPageProps> = ({
                 {showMobileNav ? "close" : "menu"}
               </span>
             </button>
-            <Link to="/" className="text-xl sm:text-2xl font-extrabold tracking-tight text-on-surface font-headline">
+            <Link to="/" className="text-2xl font-extrabold tracking-tight text-on-surface font-headline">
               NexusAI
             </Link>
           </div>

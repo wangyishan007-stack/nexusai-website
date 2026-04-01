@@ -91,7 +91,7 @@ export default function ActivityPage({ className }: ActivityPageProps) {
                 )}
               </button>
               {showFilters && (
-                <div className="absolute right-0 top-full mt-2 w-72 bg-surface-container-lowest border border-outline-variant/20 rounded-xl shadow-lg z-30 p-4 space-y-3">
+                <div className="absolute right-0 top-full mt-2 w-72 bg-surface-container-lowest border border-outline-variant/20 rounded-xl shadow-lg z-50 p-4 space-y-3">
                   {/* Models */}
                   <div className="relative">
                     <select

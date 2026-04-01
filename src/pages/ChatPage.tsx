@@ -142,7 +142,7 @@ export const ChatPage: React.FC<ChatPageProps> = ({ className = "" }) => {
             </button>
             <Link
               to="/"
-              className="text-xl font-extrabold tracking-tight text-on-surface font-headline"
+              className="text-2xl font-extrabold tracking-tight text-on-surface font-headline"
             >
               NexusAI
             </Link>
