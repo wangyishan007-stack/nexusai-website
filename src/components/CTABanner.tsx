@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../hooks/useAuth";
 import { LoginModal } from "./LoginModal";
 
@@ -8,6 +9,7 @@ interface CTABannerProps {
 }
 
 export const CTABanner: React.FC<CTABannerProps> = ({ className = "" }) => {
+  const { t } = useTranslation();
   const { isLoggedIn, login } = useAuth();
   const navigate = useNavigate();
   const [showLogin, setShowLogin] = useState(false);
@@ -32,20 +34,20 @@ export const CTABanner: React.FC<CTABannerProps> = ({ className = "" }) => {
         <div className="relative bg-gradient-to-br from-primary to-primary-container rounded-[2.5rem] p-12 md:p-20 text-center overflow-hidden ambient-shadow">
           <div className="relative z-10">
             <h2 className="font-headline text-3xl md:text-5xl font-extrabold text-on-primary mb-8">
-              Ready to build the next frontier?
+              {t("cta.title")}
             </h2>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <button
                 onClick={handleClaim}
                 className="w-full sm:w-auto px-8 py-4 rounded-xl bg-white text-primary font-bold text-lg hover:scale-[1.05] transition-transform"
               >
-                Claim Free Credits
+                {t("cta.claimCredits")}
               </button>
               <Link
                 to="/docs"
                 className="w-full sm:w-auto px-8 py-4 rounded-xl border-2 border-white/30 text-white font-bold text-lg hover:bg-white/10 transition-colors"
               >
-                Read Documentation
+                {t("cta.readDocs")}
               </Link>
             </div>
           </div>

@@ -1,3 +1,5 @@
+import { useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import SettingsLayout from "../components/SettingsLayout";
 
 const MGMT_KEYS = [
@@ -35,13 +37,6 @@ const MGMT_KEYS = [
   },
 ];
 
-const AUDIT_LOG = [
-  { time: "2 hours ago", action: "Key rotated", key: "Production Admin Key", ip: "192.168.1.42", user: "wangxing" },
-  { time: "18 min ago", action: "Deploy triggered", key: "CI/CD Pipeline", ip: "10.0.0.1", user: "github-actions" },
-  { time: "1 day ago", action: "Permissions updated", key: "Staging Environment", ip: "192.168.1.42", user: "wangxing" },
-  { time: "3 days ago", action: "Key created", key: "Staging Environment", ip: "192.168.1.42", user: "wangxing" },
-  { time: "7 days ago", action: "Key revoked attempt", key: "Legacy Integration", ip: "203.0.113.50", user: "unknown" },
-];
 
 const SCOPE_OPTIONS = [
   { label: "Full Access", desc: "Create, read, update, delete all resources", icon: "admin_panel_settings" },
@@ -51,6 +46,69 @@ const SCOPE_OPTIONS = [
 ];
 
 export default function ManagementKeysPage() {
+  const [keys, setKeys] = useState(MGMT_KEYS);
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [newKeyName, setNewKeyName] = useState("");
+  const [newKeyScope, setNewKeyScope] = useState("Read Only");
+  const [revealedKey, setRevealedKey] = useState<string | null>(null);
+  const [revealedCopied, setRevealedCopied] = useState(false);
+
+  const handleCreate = useCallback(() => {
+    const name = newKeyName.trim() || `New Key ${keys.length + 1}`;
+    const fullKey = `sk-nxai-v1-${Array.from({ length: 48 }, () => "0123456789abcdef"[Math.floor(Math.random() * 16)]).join("")}`;
+    const masked = `mgmt_${name.toLowerCase().replace(/\s+/g, "_").slice(0, 4)}_****${fullKey.slice(-4)}`;
+    setKeys((prev) => [
+      {
+        name,
+        prefix: masked,
+        scope: newKeyScope,
+        created: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+        lastUsed: "Never",
+        status: "active" as const,
+      },
+      ...prev,
+    ]);
+    setRevealedKey(fullKey);
+    setRevealedCopied(false);
+    setNewKeyName("");
+    setNewKeyScope("Read Only");
+  }, [newKeyName, newKeyScope, keys.length]);
+
+  const handleCopyRevealed = useCallback(() => {
+    if (revealedKey) {
+      navigator.clipboard.writeText(revealedKey).catch(() => {});
+      setRevealedCopied(true);
+      setTimeout(() => setRevealedCopied(false), 1500);
+    }
+  }, [revealedKey]);
+
+  const closeCreateModal = useCallback(() => {
+    setShowCreateModal(false);
+    setRevealedKey(null);
+    setNewKeyName("");
+    setNewKeyScope("Read Only");
+  }, []);
+
+  const handleCopy = useCallback((prefix: string) => {
+    navigator.clipboard.writeText(prefix).catch(() => {});
+    setCopiedKey(prefix);
+    setTimeout(() => setCopiedKey(null), 1500);
+  }, []);
+
+  const handleRefresh = useCallback((prefix: string) => {
+    const id = Math.random().toString(36).slice(2, 6);
+    setKeys((prev) =>
+      prev.map((k) =>
+        k.prefix === prefix ? { ...k, prefix: `${k.prefix.slice(0, k.prefix.lastIndexOf("_") + 1)}****${id}`, lastUsed: "Just now" } : k
+      )
+    );
+  }, []);
+
+  const handleDelete = useCallback((prefix: string) => {
+    setKeys((prev) => prev.filter((k) => k.prefix !== prefix));
+  }, []);
+
   return (
     <SettingsLayout activeTab="management-keys">
       <div className="flex-1 p-4 sm:p-6 md:p-10 max-w-6xl w-full mx-auto">
@@ -62,8 +120,8 @@ export default function ManagementKeysPage() {
               Create and manage organization-level keys for programmatic access to account resources.
             </p>
           </div>
-          <button className="px-5 py-2.5 bg-primary text-white font-semibold rounded-lg text-sm hover:opacity-90 transition-opacity flex items-center gap-2 w-fit">
-            <span className="material-symbols-outlined text-[18px]">add</span>
+          <button onClick={() => setShowCreateModal(true)} className="px-5 py-2.5 bg-primary text-on-primary font-semibold rounded-lg text-sm hover:opacity-90 transition-opacity flex items-center gap-2 w-fit">
+            <span className="material-symbols-outlined" style={{ fontSize: 18 }}>add</span>
             Create Key
           </button>
         </div>
@@ -85,17 +143,13 @@ export default function ManagementKeysPage() {
         <div className="hidden md:block bg-surface-container-lowest rounded-xl overflow-hidden mb-8">
           <div className="flex justify-between items-center px-5 py-4 border-b border-outline-variant/10">
             <h4 className="font-headline font-bold text-lg">Active Keys</h4>
-            <div className="flex items-center gap-2 text-xs text-on-surface-variant">
-              <span className="material-symbols-outlined text-[14px] opacity-40">info</span>
-              {MGMT_KEYS.filter((k) => k.status === "active").length} of 10 keys used
-            </div>
           </div>
           <div>
-            {MGMT_KEYS.map((key) => (
+            {keys.map((key) => (
               <div key={key.prefix} className="flex items-center justify-between px-5 py-4 border-t border-outline-variant/10 first:border-t-0 hover:bg-surface-container/40 transition-colors">
                 <div className="flex items-center gap-4">
                   <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${key.status === "active" ? "bg-primary/8 text-primary" : "bg-surface-container text-on-surface-variant"}`}>
-                    <span className="material-symbols-outlined text-[20px]">key</span>
+                    <span className="material-symbols-outlined" style={{ fontSize: 18 }}>key</span>
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
@@ -119,14 +173,14 @@ export default function ManagementKeysPage() {
                     <p className="text-xs font-medium">{key.lastUsed}</p>
                   </div>
                   <div className="flex items-center gap-1">
-                    <button className="p-1.5 text-on-surface-variant hover:text-primary hover:bg-surface-container rounded-lg transition-colors">
-                      <span className="material-symbols-outlined text-[18px]">content_copy</span>
+                    <button onClick={() => handleCopy(key.prefix)} className="p-1.5 text-on-surface-variant hover:text-primary hover:bg-surface-container rounded-lg transition-colors" title="Copy key">
+                      <span className="material-symbols-outlined" style={{ fontSize: 16 }}>{copiedKey === key.prefix ? "check" : "content_copy"}</span>
                     </button>
-                    <button className="p-1.5 text-on-surface-variant hover:text-primary hover:bg-surface-container rounded-lg transition-colors">
-                      <span className="material-symbols-outlined text-[18px]">refresh</span>
+                    <button onClick={() => handleRefresh(key.prefix)} className="p-1.5 text-on-surface-variant hover:text-primary hover:bg-surface-container rounded-lg transition-colors" title="Rotate key">
+                      <span className="material-symbols-outlined" style={{ fontSize: 16 }}>refresh</span>
                     </button>
-                    <button className="p-1.5 text-on-surface-variant hover:text-error hover:bg-error/5 rounded-lg transition-colors">
-                      <span className="material-symbols-outlined text-[18px]">delete</span>
+                    <button onClick={() => handleDelete(key.prefix)} className="p-1.5 text-on-surface-variant hover:text-error hover:bg-error/5 rounded-lg transition-colors" title="Delete key">
+                      <span className="material-symbols-outlined" style={{ fontSize: 16 }}>delete</span>
                     </button>
                   </div>
                 </div>
@@ -139,16 +193,13 @@ export default function ManagementKeysPage() {
         <div className="md:hidden mb-8">
           <div className="flex justify-between items-center mb-4">
             <h4 className="font-headline font-bold text-lg">Active Keys</h4>
-            <span className="text-xs text-on-surface-variant">
-              {MGMT_KEYS.filter((k) => k.status === "active").length} of 10 used
-            </span>
           </div>
           <div className="space-y-3">
-            {MGMT_KEYS.map((key) => (
+            {keys.map((key) => (
               <div key={key.prefix} className="bg-surface-container-lowest rounded-xl p-4">
                 <div className="flex items-center gap-3 mb-3">
                   <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${key.status === "active" ? "bg-primary/8 text-primary" : "bg-surface-container text-on-surface-variant"}`}>
-                    <span className="material-symbols-outlined text-[18px]">key</span>
+                    <span className="material-symbols-outlined" style={{ fontSize: 18 }}>key</span>
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
@@ -167,14 +218,14 @@ export default function ManagementKeysPage() {
                   <span className="text-on-surface-variant">Last used {key.lastUsed}</span>
                 </div>
                 <div className="flex items-center gap-1 mt-3 pt-3 border-t border-outline-variant/10">
-                  <button className="p-1.5 text-on-surface-variant hover:text-primary hover:bg-surface-container rounded-lg transition-colors">
-                    <span className="material-symbols-outlined text-[18px]">content_copy</span>
+                  <button onClick={() => handleCopy(key.prefix)} className="p-1.5 text-on-surface-variant hover:text-primary hover:bg-surface-container rounded-lg transition-colors">
+                    <span className="material-symbols-outlined" style={{ fontSize: 16 }}>{copiedKey === key.prefix ? "check" : "content_copy"}</span>
                   </button>
-                  <button className="p-1.5 text-on-surface-variant hover:text-primary hover:bg-surface-container rounded-lg transition-colors">
-                    <span className="material-symbols-outlined text-[18px]">refresh</span>
+                  <button onClick={() => handleRefresh(key.prefix)} className="p-1.5 text-on-surface-variant hover:text-primary hover:bg-surface-container rounded-lg transition-colors">
+                    <span className="material-symbols-outlined" style={{ fontSize: 16 }}>refresh</span>
                   </button>
-                  <button className="ml-auto p-1.5 text-on-surface-variant hover:text-error hover:bg-error/5 rounded-lg transition-colors">
-                    <span className="material-symbols-outlined text-[18px]">delete</span>
+                  <button onClick={() => handleDelete(key.prefix)} className="ml-auto p-1.5 text-on-surface-variant hover:text-error hover:bg-error/5 rounded-lg transition-colors">
+                    <span className="material-symbols-outlined" style={{ fontSize: 16 }}>delete</span>
                   </button>
                 </div>
               </div>
@@ -182,71 +233,89 @@ export default function ManagementKeysPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-          {/* Audit Log - Desktop */}
-          <div className="lg:col-span-2 bg-surface-container-lowest rounded-xl overflow-hidden hidden md:block">
-            <div className="flex justify-between items-center px-5 py-4 border-b border-outline-variant/10">
-              <h4 className="font-headline font-bold text-lg">Audit Log</h4>
-              <button className="text-xs text-primary font-semibold hover:underline">View all</button>
+      </div>
+
+      {/* Create Key Modal */}
+      {showCreateModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={closeCreateModal}>
+          <div
+            className="w-full max-w-md bg-surface-container-lowest rounded-xl border border-outline-variant/20 shadow-2xl mx-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="px-6 py-4 border-b border-outline-variant/10 flex items-center justify-between">
+              <h3 className="text-base font-bold text-on-surface">Create a Management Key</h3>
+              <button onClick={closeCreateModal} className="text-on-surface-variant hover:text-on-surface transition-colors">
+                <span className="material-symbols-outlined" style={{ fontSize: 20 }}>close</span>
+              </button>
             </div>
-            <div>
-              {AUDIT_LOG.map((entry, i) => (
-                <div key={i} className="flex items-center justify-between px-5 py-3.5 border-t border-outline-variant/10 first:border-t-0 hover:bg-surface-container/40 transition-colors">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-2 h-2 rounded-full ${entry.action.includes("revoked") ? "bg-red-400" : "bg-emerald-400"}`} />
-                    <div>
-                      <p className="text-sm">{entry.action}</p>
-                      <p className="text-[10px] text-on-surface-variant">{entry.key}</p>
+
+            {/* Step 1: Name input */}
+            {!revealedKey && (
+              <>
+                <div className="px-6 py-5 space-y-5">
+                  <div className="space-y-1.5">
+                    <div className="flex items-center gap-1.5">
+                      <label className="text-sm font-medium text-on-surface">Name</label>
+                      <div className="relative group/tip">
+                        <span className="material-symbols-outlined text-on-surface-variant cursor-help" style={{ fontSize: 14 }}>info</span>
+                        <div className="absolute left-0 bottom-full mb-2 w-52 bg-surface-container-high border border-outline-variant/20 rounded-xl shadow-lg p-3 z-30 opacity-0 pointer-events-none group-hover/tip:opacity-100 group-hover/tip:pointer-events-auto transition-opacity text-xs text-on-surface leading-relaxed">
+                          A descriptive name to identify this key in your dashboard.
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-xs text-on-surface-variant">{entry.time}</p>
-                    <p className="text-[10px] font-mono text-on-surface-variant">{entry.ip} · {entry.user}</p>
+                    <input
+                      type="text"
+                      value={newKeyName}
+                      onChange={(e) => setNewKeyName(e.target.value)}
+                      placeholder='e.g. "Management Key"'
+                      className="w-full px-3 py-2.5 bg-surface-container rounded-lg text-sm text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                    />
                   </div>
                 </div>
-              ))}
-            </div>
-          </div>
+                <div className="px-6 py-4 border-t border-outline-variant/10 flex items-center justify-end">
+                  <button
+                    onClick={handleCreate}
+                    className="px-5 py-2 bg-primary text-on-primary font-semibold rounded-lg text-sm hover:opacity-90 transition-opacity"
+                  >
+                    Create
+                  </button>
+                </div>
+              </>
+            )}
 
-          {/* Audit Log - Mobile */}
-          <div className="lg:col-span-2 md:hidden">
-            <div className="flex justify-between items-center mb-4">
-              <h4 className="font-headline font-bold text-lg">Audit Log</h4>
-              <button className="text-xs text-primary font-semibold hover:underline">View all</button>
-            </div>
-            <div className="space-y-3">
-              {AUDIT_LOG.map((entry, i) => (
-                <div key={i} className="bg-surface-container-lowest rounded-xl p-4">
-                  <div className="flex items-center gap-2 mb-1">
-                    <div className={`w-2 h-2 rounded-full ${entry.action.includes("revoked") ? "bg-red-400" : "bg-emerald-400"}`} />
-                    <p className="text-sm font-medium">{entry.action}</p>
-                  </div>
-                  <div className="flex items-center justify-between text-xs text-on-surface-variant">
-                    <span>{entry.key}</span>
-                    <span>{entry.time}</span>
-                  </div>
+            {/* Step 2: Reveal key */}
+            {revealedKey && (
+              <div className="px-6 py-5 space-y-4">
+                <p className="text-sm font-medium text-on-surface text-center">Your new management key:</p>
+                <div className="flex items-center gap-2 bg-surface-container rounded-lg px-3 py-2.5">
+                  <code className="flex-1 text-sm font-mono text-on-surface truncate">{revealedKey}</code>
+                  <button
+                    onClick={handleCopyRevealed}
+                    className="shrink-0 p-1.5 text-on-surface-variant hover:text-primary hover:bg-surface-container-high rounded-lg transition-colors"
+                    title="Copy"
+                  >
+                    <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
+                      {revealedCopied ? "check" : "content_copy"}
+                    </span>
+                  </button>
                 </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Scope Reference */}
-          <div className="bg-surface-container-lowest rounded-xl p-5 sm:p-6">
-            <h4 className="font-headline font-bold text-lg mb-4">Permission Scopes</h4>
-            <div className="space-y-4">
-              {SCOPE_OPTIONS.map((scope) => (
-                <div key={scope.label} className="flex items-start gap-3 p-3 rounded-lg hover:bg-surface-container/40 transition-colors">
-                  <span className="material-symbols-outlined text-primary text-[20px] mt-0.5">{scope.icon}</span>
-                  <div>
-                    <p className="text-sm font-semibold">{scope.label}</p>
-                    <p className="text-xs text-on-surface-variant mt-0.5">{scope.desc}</p>
-                  </div>
+                <div className="space-y-2 text-sm text-on-surface leading-relaxed">
+                  <p>
+                    Please copy it now and write it down somewhere safe.{" "}
+                    <strong>You will not be able to see it again.</strong>
+                  </p>
+                  <p className="text-error">
+                    This is a management key. It can only be used to manage other API keys and cannot make model requests.
+                  </p>
+                  <p className="text-on-surface-variant">
+                    You can use it with our admin API endpoints to manage API keys programmatically.
+                  </p>
                 </div>
-              ))}
-            </div>
+              </div>
+            )}
           </div>
         </div>
-      </div>
+      )}
     </SettingsLayout>
   );
 }

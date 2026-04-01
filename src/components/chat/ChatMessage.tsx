@@ -1,5 +1,6 @@
 import { memo, useState } from "react";
 import type React from "react";
+import { useTranslation } from "react-i18next";
 import type { ChatMessage as ChatMessageType, ChatModel } from "../../data/chatModels";
 import { MarkdownRenderer } from "./MarkdownRenderer";
 
@@ -22,6 +23,7 @@ function formatTimestamp(ts: number): string {
 
 export const ChatMessageComponent: React.FC<ChatMessageProps> = memo(
   function ChatMessageComponent({ message, model, onCopy, onRegenerate, isLast }) {
+    const { t } = useTranslation();
     const [hovered, setHovered] = useState(false);
     const isUser = message.role === "user";
 
@@ -39,9 +41,9 @@ export const ChatMessageComponent: React.FC<ChatMessageProps> = memo(
                 <button
                   onClick={() => onCopy(message.content)}
                   className="p-1 text-on-surface-variant hover:text-on-surface rounded transition-colors"
-                  title="Copy"
+                  title={t("chat.copy")}
                 >
-                  <span className="material-symbols-outlined text-[16px]" style={thinIcon}>content_copy</span>
+                  <span className="material-symbols-outlined" style={{ fontSize: 16, ...thinIcon }}>content_copy</span>
                 </button>
               </div>
             )}
@@ -57,7 +59,7 @@ export const ChatMessageComponent: React.FC<ChatMessageProps> = memo(
 
           {/* User avatar */}
           <div className="shrink-0 w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold font-headline">
-            You
+            {t("chat.user_avatar")}
           </div>
         </div>
       );
@@ -88,17 +90,17 @@ export const ChatMessageComponent: React.FC<ChatMessageProps> = memo(
               <button
                 onClick={() => onCopy(message.content)}
                 className="p-1 text-on-surface-variant hover:text-on-surface rounded transition-colors"
-                title="Copy"
+                title={t("chat.copy")}
               >
-                <span className="material-symbols-outlined text-[16px]" style={thinIcon}>content_copy</span>
+                <span className="material-symbols-outlined" style={{ fontSize: 16, ...thinIcon }}>content_copy</span>
               </button>
               {isLast && onRegenerate && (
                 <button
                   onClick={onRegenerate}
                   className="p-1 text-on-surface-variant hover:text-on-surface rounded transition-colors"
-                  title="Regenerate"
+                  title={t("chat.regenerate")}
                 >
-                  <span className="material-symbols-outlined text-[16px]" style={thinIcon}>refresh</span>
+                  <span className="material-symbols-outlined" style={{ fontSize: 16, ...thinIcon }}>refresh</span>
                 </button>
               )}
             </div>

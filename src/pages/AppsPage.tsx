@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { Navbar } from "../components/Navbar";
 import { Footer } from "../components/Footer";
 import { LoginModal } from "../components/LoginModal";
@@ -8,17 +9,11 @@ interface AppsPageProps {
   readonly className?: string;
 }
 
-const RULES = [
-  "Enter your app name and app domain, then click 'Get Code' to generate your unique APP Code.",
-  <>
-    Add the{" "}
-    <code className="bg-surface-container-highest px-1.5 py-0.5 rounded text-primary font-mono text-sm">
-      X-App-Code
-    </code>{" "}
-    header to your API requests with your APP Code.
-  </>,
-  "All requests with a valid APP Code will automatically receive a 10% discount \u2014 no extra steps needed.",
-  "Each account can register up to 5 apps. APP Codes are bound to domains, so make sure your domain is correct.",
+const RULE_KEYS = [
+  "apps.rule_1",
+  "apps.rule_2", // handled specially in JSX
+  "apps.rule_3",
+  "apps.rule_4",
 ];
 
 function makeCodeExamples(appCode: string) {
@@ -74,6 +69,7 @@ console.log(data);`,
 }
 
 export const AppsPage: React.FC<AppsPageProps> = ({ className = "" }) => {
+  const { t } = useTranslation();
   const [appName, setAppName] = useState("");
   const [appDomain, setAppDomain] = useState("");
   const [activeTab, setActiveTab] = useState(0);
@@ -127,26 +123,37 @@ export const AppsPage: React.FC<AppsPageProps> = ({ className = "" }) => {
         <div className="max-w-2xl mx-auto">
           {/* Title Area */}
           <div className="text-center mb-12">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary-fixed text-primary mb-6">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/15 text-primary mb-6">
               <span className="material-symbols-outlined text-4xl">featured_seasonal_and_gifts</span>
             </div>
             <h1 className="text-4xl md:text-5xl font-headline font-extrabold text-on-background tracking-tight mb-4">
-              Integrate NexusAI, get 10% off
+              {t("apps.title")}
             </h1>
             <p className="text-lg text-on-surface-variant leading-relaxed">
-              Connect NexusAI to your app, get a unique APP Code, and automatically receive 10% off
-              all API calls.
+              {t("apps.subtitle")}
             </p>
           </div>
 
           {/* Rules Grid */}
           <div className="bg-surface-container-low rounded-xl p-8 mb-10 space-y-6">
-            {RULES.map((rule, i) => (
+            {RULE_KEYS.map((key, i) => (
               <div key={i} className="flex gap-4">
                 <span className="flex-none w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs">
                   {i + 1}
                 </span>
-                <p className="text-on-surface font-medium leading-relaxed">{rule}</p>
+                <p className="text-on-surface font-medium leading-relaxed">
+                  {key === "apps.rule_2" ? (
+                    <>
+                      {t("apps.rule_2_prefix")}{" "}
+                      <code className="bg-surface-container-highest px-1.5 py-0.5 rounded text-primary font-mono text-sm">
+                        {t("apps.rule_2_code")}
+                      </code>{" "}
+                      {t("apps.rule_2_suffix")}
+                    </>
+                  ) : (
+                    t(key)
+                  )}
+                </p>
               </div>
             ))}
           </div>
@@ -162,8 +169,8 @@ export const AppsPage: React.FC<AppsPageProps> = ({ className = "" }) => {
                     <span className="material-symbols-outlined text-xl">check_circle</span>
                   </div>
                   <div>
-                    <h3 className="font-headline font-bold text-lg">APP Code Generated</h3>
-                    <p className="text-sm text-on-surface-variant">Your app has been registered successfully.</p>
+                    <h3 className="font-headline font-bold text-lg">{t("apps.code_generated")}</h3>
+                    <p className="text-sm text-on-surface-variant">{t("apps.registered_successfully")}</p>
                   </div>
                 </div>
 
@@ -176,7 +183,7 @@ export const AppsPage: React.FC<AppsPageProps> = ({ className = "" }) => {
                     onClick={handleCopy}
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-on-primary text-xs font-semibold hover:opacity-90 transition-all active:scale-95"
                   >
-                    <span className="material-symbols-outlined text-[14px]">
+                    <span className="material-symbols-outlined" style={{ fontSize: 14 }}>
                       {copied ? "check" : "content_copy"}
                     </span>
                     {copied ? "Copied!" : "Copy"}
@@ -186,14 +193,14 @@ export const AppsPage: React.FC<AppsPageProps> = ({ className = "" }) => {
                 {/* Info */}
                 <div className="space-y-3 text-sm">
                   <div className="flex items-center gap-2 text-on-surface-variant">
-                    <span className="material-symbols-outlined text-[16px]">language</span>
+                    <span className="material-symbols-outlined" style={{ fontSize: 16 }}>language</span>
                     <span>
-                      Bound to domain: <strong className="text-on-surface">https://{appDomain}</strong>
+                      {t("apps.bound_to_domain")} <strong className="text-on-surface">https://{appDomain}</strong>
                     </span>
                   </div>
                   <div className="flex items-center gap-2 text-on-surface-variant">
-                    <span className="material-symbols-outlined text-[16px]">save</span>
-                    <span>Code saved. You can view it in your account settings.</span>
+                    <span className="material-symbols-outlined" style={{ fontSize: 16 }}>save</span>
+                    <span>{t("apps.code_saved")}</span>
                   </div>
                 </div>
 
@@ -202,7 +209,7 @@ export const AppsPage: React.FC<AppsPageProps> = ({ className = "" }) => {
                   onClick={handleReset}
                   className="w-full py-3 rounded-lg border border-outline-variant/30 text-sm font-semibold text-on-surface-variant hover:bg-surface-container-low transition-colors"
                 >
-                  Register Another App
+                  {t("apps.register_another")}
                 </button>
               </div>
             ) : (
@@ -210,19 +217,19 @@ export const AppsPage: React.FC<AppsPageProps> = ({ className = "" }) => {
               <div className="space-y-6">
                 <div>
                   <label className="block text-sm font-semibold text-on-surface-variant mb-2 ml-1">
-                    App Name
+                    {t("apps.label_app_name")}
                   </label>
                   <input
                     type="text"
                     value={appName}
                     onChange={(e) => setAppName(e.target.value)}
-                    placeholder="e.g.: InferEra"
+                    placeholder={t("apps.placeholder_app_name")}
                     className="w-full bg-surface-container-low border-none rounded-lg py-3 px-4 focus:ring-2 focus:ring-primary focus:bg-surface-container-lowest transition-all duration-200"
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-on-surface-variant mb-2 ml-1">
-                    App Domain
+                    {t("apps.label_app_domain")}
                   </label>
                   <div className="relative">
                     <span className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant font-medium text-sm">
@@ -232,7 +239,7 @@ export const AppsPage: React.FC<AppsPageProps> = ({ className = "" }) => {
                       type="text"
                       value={appDomain}
                       onChange={(e) => setAppDomain(e.target.value)}
-                      placeholder="your-app.com"
+                      placeholder={t("apps.placeholder_domain")}
                       className="w-full bg-surface-container-low border-none rounded-lg py-3 pl-[4.5rem] pr-4 focus:ring-2 focus:ring-primary focus:bg-surface-container-lowest transition-all duration-200"
                     />
                   </div>

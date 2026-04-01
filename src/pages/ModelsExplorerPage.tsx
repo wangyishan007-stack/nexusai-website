@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { NAV_LINKS } from "../data/mockData";
 import { useAuth } from "../hooks/useAuth";
 import { LoginModal } from "../components/LoginModal";
@@ -161,13 +162,123 @@ const MODEL_ROWS = [
     context: "128k",
     released: "Jan 02, 2024",
   },
+  {
+    slug: "gemini-2-0-pro",
+    initial: "G",
+    bgColor: "bg-cyan-100",
+    textColor: "text-cyan-700",
+    name: "Google: Gemini 2.0 Pro",
+    tags: "Multi-modal \u2022 Reasoning",
+    tokens: "8.2T",
+    input: "$1.25",
+    output: "$5.00",
+    context: "1M",
+    released: "Dec 18, 2023",
+  },
+  {
+    slug: "mistral-large-2",
+    initial: "M",
+    bgColor: "bg-amber-100",
+    textColor: "text-amber-700",
+    name: "Mistral: Large 2",
+    tags: "General \u2022 Multilingual",
+    tokens: "3.1T",
+    input: "$2.00",
+    output: "$6.00",
+    context: "128k",
+    released: "Dec 10, 2023",
+  },
+  {
+    slug: "deepseek-v3",
+    initial: "D",
+    bgColor: "bg-teal-100",
+    textColor: "text-teal-700",
+    name: "DeepSeek: V3",
+    tags: "Code \u2022 Reasoning",
+    tokens: "14.8T",
+    input: "$0.27",
+    output: "$1.10",
+    context: "128k",
+    released: "Dec 05, 2023",
+  },
+  {
+    slug: "grok-2",
+    initial: "X",
+    bgColor: "bg-surface-container-high",
+    textColor: "text-on-surface",
+    name: "xAI: Grok 2",
+    tags: "General \u2022 Real-time",
+    tokens: "N/A",
+    input: "$5.00",
+    output: "$10.00",
+    context: "128k",
+    released: "Nov 22, 2023",
+  },
+  {
+    slug: "qwen-2-5-72b",
+    initial: "Q",
+    bgColor: "bg-violet-100",
+    textColor: "text-violet-700",
+    name: "Qwen: 2.5 72B",
+    tags: "General \u2022 Multilingual",
+    tokens: "18T",
+    input: "$0.90",
+    output: "$0.90",
+    context: "128k",
+    released: "Nov 15, 2023",
+  },
+  {
+    slug: "cohere-command-r-plus",
+    initial: "C",
+    bgColor: "bg-green-100",
+    textColor: "text-green-700",
+    name: "Cohere: Command R+",
+    tags: "RAG \u2022 Enterprise",
+    tokens: "N/A",
+    input: "$2.50",
+    output: "$10.00",
+    context: "128k",
+    released: "Nov 02, 2023",
+  },
+  {
+    slug: "phi-4",
+    initial: "P",
+    bgColor: "bg-indigo-100",
+    textColor: "text-indigo-700",
+    name: "Microsoft: Phi-4",
+    tags: "Small \u2022 Efficient",
+    tokens: "9.8T",
+    input: "$0.07",
+    output: "$0.14",
+    context: "16k",
+    released: "Oct 28, 2023",
+  },
 ];
+
+const SORT_OPTIONS = [
+  "Most Popular",
+  "Newest",
+  "Top Weekly",
+  "Pricing: Low to High",
+  "Pricing: High to Low",
+  "Context: High to Low",
+  "Throughput: High to Low",
+  "Latency: Low to High",
+] as const;
+
+const INITIAL_VISIBLE = 5;
+const LOAD_MORE_COUNT = 4;
 
 export const ModelsExplorerPage: React.FC<ModelsExplorerPageProps> = ({
   className = "",
   defaultFiltersExpanded = false,
 }) => {
+  const { t } = useTranslation();
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
+  const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE);
+  const [sortBy, setSortBy] = useState<string>("Newest");
+  const [showSortMenu, setShowSortMenu] = useState(false);
+  const sortRef = useRef<HTMLDivElement>(null);
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>(() => {
     if (defaultFiltersExpanded) {
       return Object.fromEntries(Object.keys(FILTER_GROUPS_EXPANDED).map((k) => [k, true]));
@@ -206,6 +317,17 @@ export const ModelsExplorerPage: React.FC<ModelsExplorerPageProps> = ({
     return () => document.removeEventListener("mousedown", handleClick);
   }, [showUserMenu]);
 
+  useEffect(() => {
+    if (!showSortMenu) return;
+    const handleClick = (e: MouseEvent) => {
+      if (sortRef.current && !sortRef.current.contains(e.target as Node)) {
+        setShowSortMenu(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [showSortMenu]);
+
   const visibleLinks = isLoggedIn
     ? NAV_LINKS.filter((link) => link.href !== "/pricing")
     : NAV_LINKS;
@@ -226,7 +348,7 @@ export const ModelsExplorerPage: React.FC<ModelsExplorerPageProps> = ({
   return (
     <div className={`bg-surface text-on-surface antialiased h-screen flex flex-col overflow-hidden ${className}`}>
       {/* Inline header matching shared Navbar style */}
-      <header className="shrink-0 bg-surface-container-lowest/80 backdrop-blur-md border-b border-outline-variant/10">
+      <header className="shrink-0 bg-surface-container-lowest/80 backdrop-blur-md border-b border-outline-variant/10 relative z-50">
         <div className="flex items-center justify-between px-6 h-16 max-w-7xl mx-auto">
           <Link to="/" className="text-2xl font-extrabold tracking-tight text-on-surface font-headline">
             NexusAI
@@ -236,7 +358,7 @@ export const ModelsExplorerPage: React.FC<ModelsExplorerPageProps> = ({
               const isActive = pathname.startsWith(link.href);
               return (
                 <Link
-                  key={link.label}
+                  key={link.labelKey}
                   to={link.href}
                   className={`text-sm font-medium tracking-wide transition-colors ${
                     isActive
@@ -244,7 +366,7 @@ export const ModelsExplorerPage: React.FC<ModelsExplorerPageProps> = ({
                       : "text-on-surface-variant hover:text-on-surface"
                   }`}
                 >
-                  {link.label}
+                  {t(link.labelKey)}
                 </Link>
               );
             })}
@@ -258,31 +380,31 @@ export const ModelsExplorerPage: React.FC<ModelsExplorerPageProps> = ({
                 x
               </button>
               {showUserMenu && (
-                <div className="absolute right-0 top-full mt-2 w-56 bg-surface-container-lowest rounded-xl shadow-xl overflow-hidden py-1 z-50">
+                <div className="absolute right-0 top-full mt-2 w-56 bg-surface-container-lowest rounded-xl shadow-xl overflow-hidden py-1 z-[100]">
                   <div className="flex items-center gap-3 px-4 py-3 border-b border-outline-variant/10">
                     <div className="w-9 h-9 rounded-full bg-rose-800 text-white flex items-center justify-center text-sm font-bold">x</div>
-                    <span className="font-semibold text-on-surface">Personal</span>
+                    <span className="font-semibold text-on-surface">{t("userMenu.personal")}</span>
                     <Link to="/settings/preferences" onClick={() => setShowUserMenu(false)} className="ml-auto text-on-surface-variant hover:text-on-surface transition-colors">
                       <span className="material-symbols-outlined text-xl">settings</span>
                     </Link>
                   </div>
                   <div className="py-1">
                     {[
-                      { icon: "bar_chart", label: "Activity", href: "/settings/activity" },
-                      { icon: "format_list_bulleted", label: "Logs", href: "/settings/logs" },
-                      { icon: "credit_card", label: "Credits", href: "/settings/credits" },
-                      { icon: "settings", label: "Settings", href: "/settings/preferences" },
+                      { icon: "bar_chart", labelKey: "userMenu.activity", href: "/settings/activity" },
+                      { icon: "format_list_bulleted", labelKey: "userMenu.logs", href: "/settings/logs" },
+                      { icon: "credit_card", labelKey: "userMenu.credits", href: "/settings/credits" },
+                      { icon: "settings", labelKey: "userMenu.settings", href: "/settings/preferences" },
                     ].map((item) => (
-                      <Link key={item.label} to={item.href} onClick={() => setShowUserMenu(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-on-surface hover:bg-surface-container/60 transition-colors">
+                      <Link key={item.labelKey} to={item.href} onClick={() => setShowUserMenu(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-on-surface hover:bg-surface-container/60 transition-colors">
                         <span className="material-symbols-outlined text-xl text-on-surface-variant">{item.icon}</span>
-                        {item.label}
+                        {t(item.labelKey)}
                       </Link>
                     ))}
                   </div>
                   <div className="border-t border-outline-variant/10 py-1">
                     <button onClick={() => { logout(); setShowUserMenu(false); }} className="flex items-center gap-3 px-4 py-2.5 text-sm text-error hover:bg-surface-container/60 transition-colors w-full">
                       <span className="material-symbols-outlined text-xl">logout</span>
-                      Sign Out
+                      {t("modelsExplorer.sign_out")}
                     </button>
                   </div>
                   <div className="border-t border-outline-variant/10 px-3 py-2">
@@ -298,10 +420,10 @@ export const ModelsExplorerPage: React.FC<ModelsExplorerPageProps> = ({
           ) : (
             <div className="flex items-center gap-4">
               <button onClick={() => setShowLogin(true)} className="text-on-surface-variant hover:text-on-surface transition-colors text-sm font-medium">
-                Sign In
+                {t("modelsExplorer.sign_in")}
               </button>
               <Link to="/settings/api-keys" className="bg-primary-container text-on-primary px-5 py-2.5 rounded-lg text-sm font-semibold hover:opacity-90 active:scale-95 duration-150 transition-all">
-                Get API Key
+                {t("modelsExplorer.get_api_key")}
               </Link>
             </div>
           )}
@@ -314,9 +436,9 @@ export const ModelsExplorerPage: React.FC<ModelsExplorerPageProps> = ({
         {/* Sidebar Filters */}
         <aside className="w-72 bg-surface-container-low p-6 overflow-y-auto hidden lg:block border-r border-surface-container shrink-0">
           <div className="flex items-center justify-between mb-8">
-            <h2 className="text-lg font-bold font-headline">Filters</h2>
+            <h2 className="text-lg font-bold font-headline">{t("modelsExplorer.filters")}</h2>
             <button className="text-xs text-primary font-semibold hover:underline" onClick={clearAll}>
-              Clear all
+              {t("modelsExplorer.clear_all")}
             </button>
           </div>
 
@@ -390,22 +512,44 @@ export const ModelsExplorerPage: React.FC<ModelsExplorerPageProps> = ({
           <header className="mb-8">
             <div className="mb-6">
               <h1 className="text-2xl sm:text-3xl font-extrabold font-headline text-on-background tracking-tight">
-                Model Explorer
+                {t("modelsExplorer.title")}
               </h1>
               <p className="text-on-surface-variant mt-1">
-                Discover and compare the latest AI models across the ecosystem.
+                {t("modelsExplorer.subtitle")}
               </p>
             </div>
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 py-4 border-y border-surface-container">
               <div className="flex items-center gap-4">
                 <span className="text-sm font-medium text-on-surface">
-                  Showing 12 of 347 models
+                  {t("modelsExplorer.showing_x_of_y", { shown: Math.min(visibleCount, MODEL_ROWS.length), total: MODEL_ROWS.length })}
                 </span>
               </div>
               <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-surface-container-low rounded-lg text-sm cursor-pointer hover:bg-surface-container transition-colors">
-                  <span className="material-symbols-outlined text-sm">sort</span>
-                  <span>Sort by Newest</span>
+                <div className="relative" ref={sortRef}>
+                  <button
+                    onClick={() => setShowSortMenu(!showSortMenu)}
+                    className="flex items-center gap-2 px-3 py-1.5 bg-surface-container-low rounded-lg text-sm cursor-pointer hover:bg-surface-container transition-colors"
+                  >
+                    <span>{t("modelsExplorer.sort_by")} {sortBy}</span>
+                    <span className="material-symbols-outlined text-sm text-on-surface-variant">keyboard_arrow_down</span>
+                  </button>
+                  {showSortMenu && (
+                    <div className="absolute right-0 top-full mt-2 w-56 bg-surface-container-lowest rounded-xl shadow-[0px_4px_20px_rgba(0,0,0,0.04),0px_12px_40px_rgba(0,0,0,0.08)] overflow-hidden z-50 py-1">
+                      {SORT_OPTIONS.map((option) => (
+                        <button
+                          key={option}
+                          onClick={() => { setSortBy(option); setShowSortMenu(false); }}
+                          className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${
+                            sortBy === option
+                              ? "text-primary font-semibold bg-primary/5"
+                              : "text-on-surface-variant hover:bg-surface-container hover:text-on-surface"
+                          }`}
+                        >
+                          {option}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 <div className="flex bg-surface-container-low p-1 rounded-lg">
                   <button
@@ -431,16 +575,16 @@ export const ModelsExplorerPage: React.FC<ModelsExplorerPageProps> = ({
               <table className="w-full text-left border-separate border-spacing-y-2">
                 <thead className="text-xs font-bold uppercase tracking-widest text-outline">
                   <tr>
-                    <th className="px-4 py-3">Model Name</th>
-                    <th className="px-4 py-3">Weekly Tokens</th>
-                    <th className="px-4 py-3">Input ($/1M)</th>
-                    <th className="px-4 py-3">Output ($/1M)</th>
-                    <th className="px-4 py-3">Context</th>
-                    <th className="px-4 py-3">Released</th>
+                    <th className="px-4 py-3">{t("modelsExplorer.col_model_name")}</th>
+                    <th className="px-4 py-3">{t("modelsExplorer.col_weekly_tokens")}</th>
+                    <th className="px-4 py-3">{t("modelsExplorer.col_input_price")}</th>
+                    <th className="px-4 py-3">{t("modelsExplorer.col_output_price")}</th>
+                    <th className="px-4 py-3">{t("modelsExplorer.col_context")}</th>
+                    <th className="px-4 py-3">{t("modelsExplorer.col_released")}</th>
                   </tr>
                 </thead>
                 <tbody className="text-sm">
-                  {MODEL_ROWS.map((model, i) => (
+                  {MODEL_ROWS.slice(0, visibleCount).map((model, i) => (
                     <tr
                       key={i}
                       className="group hover:bg-surface-container-low transition-colors cursor-pointer"
@@ -476,7 +620,7 @@ export const ModelsExplorerPage: React.FC<ModelsExplorerPageProps> = ({
           ) : (
             /* Grid View */
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-              {MODEL_ROWS.map((model, i) => (
+              {MODEL_ROWS.slice(0, visibleCount).map((model, i) => (
                 <div
                   key={i}
                   className="bg-surface rounded-xl p-5 hover:shadow-md transition-all cursor-pointer group"
@@ -510,7 +654,7 @@ export const ModelsExplorerPage: React.FC<ModelsExplorerPageProps> = ({
                   <div className="flex items-center justify-between pt-3 border-t border-outline-variant/10">
                     <span className="text-[10px] text-on-surface-variant">{model.released}</span>
                     <span className="text-xs font-semibold text-primary opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
-                      View details
+                      {t("modelsExplorer.view_details")}
                       <span className="material-symbols-outlined text-xs">arrow_forward</span>
                     </span>
                   </div>
@@ -520,11 +664,16 @@ export const ModelsExplorerPage: React.FC<ModelsExplorerPageProps> = ({
           )}
 
           {/* Load More */}
-          <div className="mt-12 flex justify-center">
-            <button className="px-8 py-3 bg-surface-container-low text-primary font-bold rounded-xl hover:bg-surface-container transition-all active:scale-95 shadow-sm">
-              Load more models
-            </button>
-          </div>
+          {visibleCount < MODEL_ROWS.length && (
+            <div className="mt-12 flex justify-center">
+              <button
+                onClick={() => setVisibleCount((c) => Math.min(c + LOAD_MORE_COUNT, MODEL_ROWS.length))}
+                className="px-8 py-3 bg-surface-container-low text-primary font-bold rounded-xl hover:bg-surface-container transition-all active:scale-95 shadow-sm"
+              >
+                {t("modelsExplorer.load_more")}
+              </button>
+            </div>
+          )}
         </main>
       </div>
 

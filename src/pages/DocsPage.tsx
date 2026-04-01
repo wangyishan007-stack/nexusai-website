@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Navbar } from "../components/Navbar";
 import { Footer } from "../components/Footer";
 
@@ -11,42 +12,42 @@ type SidebarItemId =
   | "text-generation" | "chat-completions" | "structured-outputs"
   | "agent-overview" | "tool-use";
 
-const SIDEBAR_SECTIONS: { title: string; items: { icon: string; label: string; id: SidebarItemId }[] }[] = [
+const SIDEBAR_SECTIONS: { titleKey: string; items: { icon: string; labelKey: string; id: SidebarItemId }[] }[] = [
   {
-    title: "Getting Started",
+    titleKey: "docs.sidebar_getting_started",
     items: [
-      { icon: "rocket_launch", label: "Quickstart", id: "quickstart" },
-      { icon: "info", label: "Introduction", id: "introduction" },
-      { icon: "lock", label: "Authentication", id: "authentication" },
-      { icon: "layers", label: "Models Overview", id: "models-overview" },
+      { icon: "rocket_launch", labelKey: "docs.sidebar_quickstart", id: "quickstart" },
+      { icon: "info", labelKey: "docs.sidebar_introduction", id: "introduction" },
+      { icon: "lock", labelKey: "docs.sidebar_authentication", id: "authentication" },
+      { icon: "layers", labelKey: "docs.sidebar_models_overview", id: "models-overview" },
     ],
   },
   {
-    title: "Guides",
+    titleKey: "docs.sidebar_guides",
     items: [
-      { icon: "description", label: "Text Generation", id: "text-generation" },
-      { icon: "chat", label: "Chat Completions", id: "chat-completions" },
-      { icon: "data_object", label: "Structured Outputs", id: "structured-outputs" },
+      { icon: "description", labelKey: "docs.sidebar_text_generation", id: "text-generation" },
+      { icon: "chat", labelKey: "docs.sidebar_chat_completions", id: "chat-completions" },
+      { icon: "data_object", labelKey: "docs.sidebar_structured_outputs", id: "structured-outputs" },
     ],
   },
   {
-    title: "Agents",
+    titleKey: "docs.sidebar_agents",
     items: [
-      { icon: "smart_toy", label: "Agent Overview", id: "agent-overview" },
-      { icon: "build", label: "Tool Use", id: "tool-use" },
+      { icon: "smart_toy", labelKey: "docs.sidebar_agent_overview", id: "agent-overview" },
+      { icon: "build", labelKey: "docs.sidebar_tool_use", id: "tool-use" },
     ],
   },
 ];
 
-const BENTO_LINKS: { icon: string; title: string; desc: string; sectionId: string }[] = [
-  { icon: "api", title: "API Reference", desc: "Detailed endpoint specifications and parameters.", sectionId: "parameters" },
-  { icon: "view_module", title: "Models Overview", desc: "Explore the 300+ available models and pricing.", sectionId: "models-overview" },
-  { icon: "handyman", title: "Tool Use", desc: "How to connect models to external functions.", sectionId: "tool-use" },
-  { icon: "security", title: "Authentication", desc: "Manage your API keys and security settings.", sectionId: "step-1" },
+const BENTO_LINKS: { icon: string; titleKey: string; descKey: string; sectionId: string }[] = [
+  { icon: "api", titleKey: "docs.bento_api_reference", descKey: "docs.bento_api_reference_desc", sectionId: "parameters" },
+  { icon: "view_module", titleKey: "docs.bento_models_overview", descKey: "docs.bento_models_overview_desc", sectionId: "models-overview" },
+  { icon: "handyman", titleKey: "docs.bento_tool_use", descKey: "docs.bento_tool_use_desc", sectionId: "tool-use" },
+  { icon: "security", titleKey: "docs.bento_authentication", descKey: "docs.bento_authentication_desc", sectionId: "step-1" },
 ];
 
 const TOC_IDS = ["quickstart", "step-1", "step-2", "step-3", "step-4", "parameters", "next-steps"];
-const TOC_LABELS = ["Quickstart", "1. Get Your API Key", "2. Install SDK", "3. Make Your First Request", "4. Response Format", "Key Parameters", "Next Steps"];
+const TOC_LABEL_KEYS = ["docs.toc_quickstart", "docs.step_1_title", "docs.step_2_title", "docs.step_3_title", "docs.step_4_title", "docs.toc_key_parameters", "docs.toc_next_steps"];
 
 const PARAMETERS_TABLE = [
   { param: "model", type: "string", desc: "ID of the model to use. Format: provider/model-id." },
@@ -56,10 +57,10 @@ const PARAMETERS_TABLE = [
 ];
 
 const NEXT_STEPS = [
-  { icon: "auto_awesome", title: "Explore Models", desc: "Browse the library of 300+ frontier and open-source models.", href: "/models" },
-  { icon: "point_of_sale", title: "Pricing Guide", desc: "Understand our unified token pricing across all providers.", href: "/pricing" },
-  { icon: "terminal", title: "SDK Examples", desc: "Advanced patterns for streaming, tool use, and vision.", href: "#step-3" },
-  { icon: "groups", title: "Join Community", desc: "Get help and share your projects on Discord or GitHub.", href: "#" },
+  { icon: "auto_awesome", titleKey: "docs.next_explore_models", descKey: "docs.next_explore_models_desc", href: "/models" },
+  { icon: "point_of_sale", titleKey: "docs.next_pricing_guide", descKey: "docs.next_pricing_guide_desc", href: "/pricing" },
+  { icon: "terminal", titleKey: "docs.next_sdk_examples", descKey: "docs.next_sdk_examples_desc", href: "#step-3" },
+  { icon: "groups", titleKey: "docs.next_join_community", descKey: "docs.next_join_community_desc", href: "#" },
 ];
 
 type CodeTab = "python" | "typescript" | "curl";
@@ -135,6 +136,7 @@ const RESPONSE_JSON = `{
 }`;
 
 export const DocsPage: React.FC<DocsPageProps> = ({ className = "" }) => {
+  const { t } = useTranslation();
   const [activeSidebar, setActiveSidebar] = useState<SidebarItemId>("quickstart");
   const [installTab, setInstallTab] = useState<CodeTab>("python");
   const [requestTab, setRequestTab] = useState<CodeTab>("python");
@@ -182,9 +184,9 @@ export const DocsPage: React.FC<DocsPageProps> = ({ className = "" }) => {
         {/* Left Sidebar */}
         <aside className="fixed left-0 top-16 h-[calc(100vh-4rem)] w-64 overflow-y-auto bg-surface-container-low border-r border-outline-variant/10 flex-col p-4 space-y-6 hidden lg:flex">
           {SIDEBAR_SECTIONS.map((section) => (
-            <div key={section.title}>
+            <div key={section.titleKey}>
               <h3 className="px-3 mb-2 text-xs font-bold text-on-surface-variant uppercase tracking-widest">
-                {section.title}
+                {t(section.titleKey)}
               </h3>
               <nav className="space-y-1">
                 {section.items.map((item) => (
@@ -201,7 +203,7 @@ export const DocsPage: React.FC<DocsPageProps> = ({ className = "" }) => {
                     }`}
                   >
                     <span className="material-symbols-outlined text-lg">{item.icon}</span>
-                    <span className="text-sm">{item.label}</span>
+                    <span className="text-sm">{t(item.labelKey)}</span>
                   </button>
                 ))}
               </nav>
@@ -214,7 +216,7 @@ export const DocsPage: React.FC<DocsPageProps> = ({ className = "" }) => {
                 V2
               </div>
               <div>
-                <p className="text-xs font-bold text-on-surface leading-tight">Documentation</p>
+                <p className="text-xs font-bold text-on-surface leading-tight">{t("docs.documentation_label")}</p>
                 <p className="text-[10px] text-on-surface-variant">v2.4.0</p>
               </div>
             </div>
@@ -226,22 +228,21 @@ export const DocsPage: React.FC<DocsPageProps> = ({ className = "" }) => {
           <div className="max-w-4xl mx-auto">
             {/* Breadcrumb */}
             <nav className="flex items-center gap-2 text-xs font-medium text-on-surface-variant mb-6">
-              <span>Docs</span>
+              <span>{t("docs.breadcrumb_docs")}</span>
               <span className="material-symbols-outlined text-sm">chevron_right</span>
-              <span>Getting Started</span>
+              <span>{t("docs.sidebar_getting_started")}</span>
               <span className="material-symbols-outlined text-sm">chevron_right</span>
-              <span className="text-on-surface">Quickstart</span>
+              <span className="text-on-surface">{t("docs.sidebar_quickstart")}</span>
             </nav>
 
             <h1
               className="text-4xl md:text-5xl font-extrabold font-headline tracking-tight text-on-background mb-6"
               id="quickstart"
             >
-              Quickstart
+              {t("docs.sidebar_quickstart")}
             </h1>
             <p className="text-lg text-on-surface-variant leading-relaxed mb-10">
-              Make your first API call in minutes. NexusAI is OpenAI-compatible, so you can use your
-              existing SDK and just change the base URL.
+              {t("docs.quickstart_desc")}
             </p>
 
             {/* Callout */}
@@ -254,12 +255,9 @@ export const DocsPage: React.FC<DocsPageProps> = ({ className = "" }) => {
                   info
                 </span>
                 <div>
-                  <p className="font-bold text-on-secondary-container mb-1">OpenAI Compatible</p>
+                  <p className="font-bold text-on-secondary-container mb-1">{t("docs.openai_compatible")}</p>
                   <p className="text-sm text-on-surface-variant">
-                    NexusAI supports the OpenAI SDK format. Just change{" "}
-                    <code className="bg-secondary-container/20 px-1 rounded">base_url</code> and{" "}
-                    <code className="bg-secondary-container/20 px-1 rounded">api_key</code> to access
-                    300+ models.
+                    {t("docs.openai_compatible_desc")}
                   </p>
                 </div>
               </div>
@@ -269,7 +267,7 @@ export const DocsPage: React.FC<DocsPageProps> = ({ className = "" }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-16">
               {BENTO_LINKS.map((link) => (
                 <button
-                  key={link.title}
+                  key={link.titleKey}
                   onClick={() => scrollTo(link.sectionId)}
                   className="group p-6 bg-surface-container-low rounded-xl hover:bg-surface-container transition-all text-left"
                 >
@@ -281,8 +279,8 @@ export const DocsPage: React.FC<DocsPageProps> = ({ className = "" }) => {
                       arrow_forward
                     </span>
                   </div>
-                  <h4 className="font-bold text-on-surface mb-1">{link.title}</h4>
-                  <p className="text-sm text-on-surface-variant">{link.desc}</p>
+                  <h4 className="font-bold text-on-surface mb-1">{t(link.titleKey)}</h4>
+                  <p className="text-sm text-on-surface-variant">{t(link.descKey)}</p>
                 </button>
               ))}
             </div>
@@ -290,11 +288,10 @@ export const DocsPage: React.FC<DocsPageProps> = ({ className = "" }) => {
             {/* Step 1 */}
             <section className="mb-16" id="step-1">
               <h2 className="text-2xl font-bold font-headline mb-4">
-                1. Get Your API Key
+                {t("docs.step_1_title")}
               </h2>
               <p className="text-on-surface-variant mb-6">
-                To use the API, you'll need an API key. You can create one in the NexusAI Dashboard.
-                Once you have it, set it as an environment variable.
+                {t("docs.step_1_desc")}
               </p>
               <div className="relative group">
                 <div className="absolute -inset-1 bg-gradient-to-r from-primary to-primary-container rounded-lg blur opacity-5 group-hover:opacity-10 transition duration-1000" />
@@ -308,7 +305,7 @@ export const DocsPage: React.FC<DocsPageProps> = ({ className = "" }) => {
                       <span className="material-symbols-outlined text-xs">
                         {copiedId === "env" ? "check" : "content_copy"}
                       </span>
-                      {copiedId === "env" ? "Copied!" : "Copy"}
+                      {copiedId === "env" ? t("docs.copied") : t("docs.copy")}
                     </button>
                   </div>
                   <code className="text-primary">
@@ -322,11 +319,10 @@ export const DocsPage: React.FC<DocsPageProps> = ({ className = "" }) => {
             {/* Step 2 */}
             <section className="mb-16" id="step-2">
               <h2 className="text-2xl font-bold font-headline mb-4">
-                2. Install SDK
+                {t("docs.step_2_title")}
               </h2>
               <p className="text-on-surface-variant mb-6">
-                Choose your preferred language and install the standard OpenAI SDK or use our native
-                packages.
+                {t("docs.step_2_desc")}
               </p>
               <div className="bg-surface-container-low rounded-xl overflow-hidden">
                 <div className="flex border-b border-outline-variant/10">
@@ -343,7 +339,7 @@ export const DocsPage: React.FC<DocsPageProps> = ({ className = "" }) => {
                       <span className="material-symbols-outlined text-xs">
                         {copiedId === "install" ? "check" : "content_copy"}
                       </span>
-                      {copiedId === "install" ? "Copied!" : "Copy"}
+                      {copiedId === "install" ? t("docs.copied") : t("docs.copy")}
                     </button>
                   </div>
                 </div>
@@ -356,11 +352,10 @@ export const DocsPage: React.FC<DocsPageProps> = ({ className = "" }) => {
             {/* Step 3 */}
             <section className="mb-16" id="step-3">
               <h2 className="text-2xl font-bold font-headline mb-4">
-                3. Make Your First Request
+                {t("docs.step_3_title")}
               </h2>
               <p className="text-on-surface-variant mb-6">
-                Initialize the client with our base URL and your key. This example uses Claude 3.5
-                Sonnet through the NexusAI gateway.
+                {t("docs.step_3_desc")}
               </p>
               <div className="bg-surface-container-low rounded-xl overflow-hidden">
                 <div className="flex border-b border-outline-variant/10 justify-between items-center pr-4">
@@ -382,7 +377,7 @@ export const DocsPage: React.FC<DocsPageProps> = ({ className = "" }) => {
                       <span className="material-symbols-outlined text-xs">
                         {copiedId === "request" ? "check" : "content_copy"}
                       </span>
-                      {copiedId === "request" ? "Copied!" : "Copy"}
+                      {copiedId === "request" ? t("docs.copied") : t("docs.copy")}
                     </button>
                   </div>
                 </div>
@@ -398,12 +393,9 @@ export const DocsPage: React.FC<DocsPageProps> = ({ className = "" }) => {
                   alternate_email
                 </span>
                 <div>
-                  <p className="font-bold text-primary mb-1">Model ID Format</p>
+                  <p className="font-bold text-primary mb-1">{t("docs.model_id_format")}</p>
                   <p className="text-sm text-on-surface-variant">
-                    Use <code className="bg-primary/10 px-1 rounded">provider/model-name</code>{" "}
-                    format, e.g.{" "}
-                    <code className="bg-primary/10 px-1 rounded">openai/gpt-4o</code> or{" "}
-                    <code className="bg-primary/10 px-1 rounded">google/gemini-1.5-pro</code>.
+                    {t("docs.model_id_format_desc")}
                   </p>
                 </div>
               </div>
@@ -412,12 +404,10 @@ export const DocsPage: React.FC<DocsPageProps> = ({ className = "" }) => {
             {/* Step 4 */}
             <section className="mb-16" id="step-4">
               <h2 className="text-2xl font-bold font-headline mb-4">
-                4. Response Format
+                {t("docs.step_4_title")}
               </h2>
               <p className="text-on-surface-variant mb-6">
-                Our API returns a standard OpenAI-compatible JSON response, enriched with
-                provider-specific metadata in the{" "}
-                <code className="bg-surface-container px-1 rounded">usage</code> object.
+                {t("docs.step_4_desc")}
               </p>
               <div className="bg-surface-container-highest rounded-xl overflow-hidden">
                 <div className="flex justify-between items-center px-6 py-3 border-b border-outline-variant/10">
@@ -429,7 +419,7 @@ export const DocsPage: React.FC<DocsPageProps> = ({ className = "" }) => {
                     <span className="material-symbols-outlined text-xs">
                       {copiedId === "response" ? "check" : "content_copy"}
                     </span>
-                    {copiedId === "response" ? "Copied!" : "Copy"}
+                    {copiedId === "response" ? t("docs.copied") : t("docs.copy")}
                   </button>
                 </div>
                 <div className="p-6 font-mono text-xs text-on-surface">
@@ -441,15 +431,15 @@ export const DocsPage: React.FC<DocsPageProps> = ({ className = "" }) => {
             {/* Parameters Table */}
             <section className="mb-16" id="parameters">
               <h2 className="text-2xl font-bold font-headline mb-6">
-                Key Parameters
+                {t("docs.toc_key_parameters")}
               </h2>
               <div className="overflow-x-auto rounded-xl bg-surface-container-low">
                 <table className="w-full text-left text-sm">
                   <thead className="text-on-surface font-bold">
                     <tr className="border-b border-outline-variant/10">
-                      <th className="px-6 py-4">Parameter</th>
-                      <th className="px-6 py-4">Type</th>
-                      <th className="px-6 py-4">Description</th>
+                      <th className="px-6 py-4">{t("docs.col_parameter")}</th>
+                      <th className="px-6 py-4">{t("docs.col_type")}</th>
+                      <th className="px-6 py-4">{t("docs.col_description")}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-outline-variant/10">
@@ -468,20 +458,20 @@ export const DocsPage: React.FC<DocsPageProps> = ({ className = "" }) => {
             {/* Next Steps */}
             <section className="mb-16" id="next-steps">
               <h2 className="text-2xl font-bold font-headline mb-6">
-                Next Steps
+                {t("docs.toc_next_steps")}
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {NEXT_STEPS.map((step) => (
                   <a
-                    key={step.title}
+                    key={step.titleKey}
                     className="p-6 bg-surface-container-low rounded-xl hover:bg-surface-container transition-all flex flex-col items-start cursor-pointer"
                     href={step.href}
                   >
                     <span className="material-symbols-outlined text-secondary mb-4">
                       {step.icon}
                     </span>
-                    <span className="font-bold mb-1">{step.title}</span>
-                    <span className="text-sm text-on-surface-variant">{step.desc}</span>
+                    <span className="font-bold mb-1">{t(step.titleKey)}</span>
+                    <span className="text-sm text-on-surface-variant">{t(step.descKey)}</span>
                   </a>
                 ))}
               </div>
@@ -492,7 +482,7 @@ export const DocsPage: React.FC<DocsPageProps> = ({ className = "" }) => {
         {/* Right Sidebar (TOC) */}
         <aside className="fixed right-0 top-20 h-[calc(100vh-5rem)] w-72 p-8 hidden xl:block">
           <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant mb-6">
-            On this page
+            {t("docs.on_this_page")}
           </h4>
           <nav className="space-y-4">
             {TOC_IDS.map((id, i) => (
@@ -505,16 +495,16 @@ export const DocsPage: React.FC<DocsPageProps> = ({ className = "" }) => {
                     : "text-on-surface-variant hover:text-primary transition-colors"
                 }`}
               >
-                {TOC_LABELS[i]}
+                {t(TOC_LABEL_KEYS[i])}
               </button>
             ))}
           </nav>
           <div className="mt-12 pt-12 border-t border-outline-variant/10">
             <div className="bg-gradient-to-br from-primary to-primary-container p-6 rounded-2xl text-on-primary">
               <p className="text-xs font-bold uppercase tracking-wider mb-2 opacity-80">Support</p>
-              <p className="font-bold mb-4">Need help with your integration?</p>
+              <p className="font-bold mb-4">{t("docs.need_help")}</p>
               <button className="w-full bg-white/20 hover:bg-white/30 backdrop-blur-sm py-2 rounded-lg text-sm font-bold transition-all">
-                Chat with Support
+                {t("docs.chat_with_support")}
               </button>
             </div>
           </div>

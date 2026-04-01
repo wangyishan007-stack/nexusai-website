@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { SHOWCASE_APPS } from "../data/mockData";
 
 interface ShowcaseProps {
@@ -5,12 +6,13 @@ interface ShowcaseProps {
 }
 
 export const Showcase: React.FC<ShowcaseProps> = ({ className = "" }) => {
+  const { t } = useTranslation();
   return (
     <section className={`py-24 bg-surface ${className}`}>
       <div className="max-w-7xl mx-auto px-6 text-center mb-16">
-        <h2 className="font-headline text-3xl font-extrabold mb-4">Built with NexusAI</h2>
+        <h2 className="font-headline text-3xl font-extrabold mb-4">{t("showcase.title")}</h2>
         <p className="text-on-surface-variant">
-          Powering the next generation of intelligent applications.
+          {t("showcase.subtitle")}
         </p>
       </div>
       <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-12">
@@ -29,7 +31,7 @@ export const Showcase: React.FC<ShowcaseProps> = ({ className = "" }) => {
               </div>
             </div>
             <h4 className="font-headline font-bold text-xl mb-2">{app.name}</h4>
-            <p className="text-on-surface-variant text-sm">{app.category}</p>
+            <p className="text-on-surface-variant text-sm">{t(app.categoryKey)}</p>
           </div>
         ))}
       </div>

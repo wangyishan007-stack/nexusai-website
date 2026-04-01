@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { GET_STARTED_STEPS, CODE_SNIPPET } from "../data/mockData";
 
 interface GetStartedProps {
@@ -5,12 +6,13 @@ interface GetStartedProps {
 }
 
 export const GetStarted: React.FC<GetStartedProps> = ({ className = "" }) => {
+  const { t } = useTranslation();
   return (
     <section className={`py-24 bg-surface-container-low ${className}`}>
       <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
         <div>
           <h2 className="font-headline text-3xl font-extrabold mb-10">
-            Get started in minutes
+            {t("getStarted.title")}
           </h2>
           <div className="space-y-8">
             {GET_STARTED_STEPS.map((item) => (
@@ -19,8 +21,8 @@ export const GetStarted: React.FC<GetStartedProps> = ({ className = "" }) => {
                   {item.step}
                 </div>
                 <div>
-                  <h4 className="font-bold mb-1">{item.title}</h4>
-                  <p className="text-on-surface-variant text-sm">{item.description}</p>
+                  <h4 className="font-bold mb-1">{t(item.titleKey)}</h4>
+                  <p className="text-on-surface-variant text-sm">{t(item.descKey)}</p>
                 </div>
               </div>
             ))}

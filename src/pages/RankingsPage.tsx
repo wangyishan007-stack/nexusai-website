@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Navbar } from "../components/Navbar";
 import { Footer } from "../components/Footer";
 
@@ -6,11 +7,11 @@ interface RankingsPageProps {
   readonly className?: string;
 }
 
-const STATS = [
-  { label: "Tokens This Week", value: "18.7B", color: "text-primary", sub: "+8.4%", subIcon: "trending_up", subColor: "text-green-600" },
-  { label: "Models Available", value: "347", color: "text-on-surface", sub: "Across all providers", subIcon: null, subColor: "text-on-surface-variant" },
-  { label: "Requests/Day", value: "4.2M", color: "text-on-surface", sub: "+12.1%", subIcon: "trending_up", subColor: "text-green-600" },
-  { label: "Providers", value: "54", color: "text-on-surface", sub: "Global infrastructure", subIcon: null, subColor: "text-on-surface-variant" },
+const STATS: { labelKey: string; value: string; color: string; sub?: string; subKey?: string; subIcon: string | null; subColor: string }[] = [
+  { labelKey: "rankings.stat_tokens_week", value: "18.7B", color: "text-primary", sub: "+8.4%", subIcon: "trending_up", subColor: "text-green-600" },
+  { labelKey: "rankings.stat_models", value: "347", color: "text-on-surface", subKey: "rankings.stat_models_sub", subIcon: null, subColor: "text-on-surface-variant" },
+  { labelKey: "rankings.stat_requests_day", value: "4.2M", color: "text-on-surface", sub: "+12.1%", subIcon: "trending_up", subColor: "text-green-600" },
+  { labelKey: "rankings.stat_providers", value: "54", color: "text-on-surface", subKey: "rankings.stat_providers_sub", subIcon: null, subColor: "text-on-surface-variant" },
 ];
 
 const TRENDING_MODELS = [
@@ -31,17 +32,17 @@ const MARKET_SHARE = [
   { name: "DeepSeek", pct: "8.3%", width: "8.3%", color: "#4D6BFE" },
   { name: "Meta", pct: "4.5%", width: "4.5%", color: "#0668E1" },
   { name: "Mistral", pct: "2.8%", width: "2.8%", color: "#FFD700" },
-  { name: "xAI", pct: "1.6%", width: "1.6%", color: "#000000" },
+  { name: "xAI", pct: "1.6%", width: "1.6%", color: "#888888" },
   { name: "Others", pct: "1.1%", width: "1.1%", color: "#737686" },
 ];
 
 const CATEGORIES = [
-  { icon: "code", title: "Coding", items: [{ name: "Claude Sonnet 4", pct: "42%" }, { name: "GPT-4o", pct: "28%" }, { name: "DeepSeek V3", pct: "21%" }] },
-  { icon: "forum", title: "Chat & Conversation", items: [{ name: "GPT-4o", pct: "48%" }, { name: "Claude Sonnet 4", pct: "31%" }, { name: "Gemini 2.5 Pro", pct: "12%" }] },
-  { icon: "edit_note", title: "Creative Writing", items: [{ name: "Claude Sonnet 4", pct: "52%" }, { name: "GPT-4o", pct: "24%" }, { name: "Llama 3.3 70B", pct: "15%" }] },
-  { icon: "analytics", title: "Data Analysis", items: [{ name: "GPT-4o", pct: "41%" }, { name: "Gemini 2.5 Pro", pct: "32%" }, { name: "DeepSeek V3", pct: "18%" }] },
-  { icon: "translate", title: "Translation", items: [{ name: "GPT-4o", pct: "38%" }, { name: "Claude Sonnet 4", pct: "29%" }, { name: "Gemini 2.5 Pro", pct: "22%" }] },
-  { icon: "summarize", title: "Summarization", items: [{ name: "Claude Haiku 3.5", pct: "44%" }, { name: "GPT-4o Mini", pct: "32%" }, { name: "Mistral Large", pct: "12%" }] },
+  { icon: "code", titleKey: "rankings.cat_coding", items: [{ name: "Claude Sonnet 4", pct: "42%" }, { name: "GPT-4o", pct: "28%" }, { name: "DeepSeek V3", pct: "21%" }] },
+  { icon: "forum", titleKey: "rankings.cat_chat", items: [{ name: "GPT-4o", pct: "48%" }, { name: "Claude Sonnet 4", pct: "31%" }, { name: "Gemini 2.5 Pro", pct: "12%" }] },
+  { icon: "edit_note", titleKey: "rankings.cat_creative", items: [{ name: "Claude Sonnet 4", pct: "52%" }, { name: "GPT-4o", pct: "24%" }, { name: "Llama 3.3 70B", pct: "15%" }] },
+  { icon: "analytics", titleKey: "rankings.cat_data", items: [{ name: "GPT-4o", pct: "41%" }, { name: "Gemini 2.5 Pro", pct: "32%" }, { name: "DeepSeek V3", pct: "18%" }] },
+  { icon: "translate", titleKey: "rankings.cat_translation", items: [{ name: "GPT-4o", pct: "38%" }, { name: "Claude Sonnet 4", pct: "29%" }, { name: "Gemini 2.5 Pro", pct: "22%" }] },
+  { icon: "summarize", titleKey: "rankings.cat_summarization", items: [{ name: "Claude Haiku 3.5", pct: "44%" }, { name: "GPT-4o Mini", pct: "32%" }, { name: "Mistral Large", pct: "12%" }] },
 ];
 
 // Top Models weekly usage data (stacked bar chart)
@@ -164,11 +165,12 @@ function generateMarketShareData() {
 const MARKET_SHARE_WEEKLY = generateMarketShareData();
 
 export const RankingsPage: React.FC<RankingsPageProps> = ({ className = "" }) => {
+  const { t } = useTranslation();
   const [activeNatLang, setActiveNatLang] = useState(0);
   const [activeProgLang, setActiveProgLang] = useState(0);
 
   return (
-    <div className={`text-on-background ${className}`}>
+    <div className={`bg-background text-on-background ${className}`}>
       <Navbar />
 
       <main className="max-w-7xl mx-auto px-6 py-12 space-y-16 pt-28">
@@ -179,29 +181,29 @@ export const RankingsPage: React.FC<RankingsPageProps> = ({ className = "" }) =>
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
               <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
             </span>
-            Live usage metrics
+            {t("rankings.badge")}
           </div>
           <h1 className="text-5xl md:text-6xl font-headline font-extrabold tracking-tight text-on-background">
-            AI Model Rankings
+            {t("rankings.title")}
           </h1>
           <p className="text-xl text-on-surface-variant max-w-2xl mx-auto font-body leading-relaxed">
-            Based on real usage data from millions of API requests through NexusAI.
+            {t("rankings.subtitle", "Based on real usage data from millions of API requests through NexusAI.")}
           </p>
         </section>
 
         {/* Stats Grid */}
         <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {STATS.map((stat) => (
-            <div key={stat.label} className="bg-surface-container-low p-8 rounded-xl space-y-2">
+            <div key={stat.labelKey} className="bg-surface-container-low p-8 rounded-xl space-y-2">
               <span className="text-on-surface-variant text-sm font-medium tracking-wide uppercase">
-                {stat.label}
+                {t(stat.labelKey)}
               </span>
               <div className={`text-4xl font-headline font-bold ${stat.color}`}>{stat.value}</div>
               <div className={`flex items-center text-xs ${stat.subColor} font-bold`}>
                 {stat.subIcon && (
                   <span className="material-symbols-outlined text-sm">{stat.subIcon}</span>
                 )}{" "}
-                {stat.sub}
+{stat.subKey ? t(stat.subKey) : stat.sub}
               </div>
             </div>
           ))}
@@ -216,10 +218,10 @@ export const RankingsPage: React.FC<RankingsPageProps> = ({ className = "" }) =>
             >
               bar_chart
             </span>
-            <h2 className="text-2xl font-headline font-bold">Top Models</h2>
+            <h2 className="text-2xl font-headline font-bold">{t("rankings.top_models")}</h2>
           </div>
           <p className="text-on-surface-variant text-sm">
-            Weekly usage of models across NexusAI
+            {t("rankings.top_models_desc", "Weekly usage of models across NexusAI")}
           </p>
 
           <div className="flex mt-4">
@@ -266,9 +268,9 @@ export const RankingsPage: React.FC<RankingsPageProps> = ({ className = "" }) =>
                       })}
                       {/* Tooltip popover */}
                       <div className="absolute top-0 left-1/2 -translate-x-1/2 hidden group-hover:block z-20 pointer-events-none">
-                        <div className="bg-white rounded-xl shadow-xl border border-slate-200 py-3 w-56">
+                        <div className="bg-surface-container-lowest rounded-xl shadow-xl border border-outline-variant/20 py-3 w-56">
                           {/* Date badge */}
-                          <div className="px-4 pb-2.5 mb-1 border-b border-slate-100">
+                          <div className="px-4 pb-2.5 mb-1 border-b border-outline-variant/15">
                             <span className="inline-block text-xs font-semibold text-on-surface bg-surface-container-low px-2.5 py-1 rounded-full">
                               {week.date}
                             </span>
@@ -289,7 +291,7 @@ export const RankingsPage: React.FC<RankingsPageProps> = ({ className = "" }) =>
                               ))}
                           </div>
                           {/* Total */}
-                          <div className="px-4 pt-2.5 mt-1 border-t border-slate-100">
+                          <div className="px-4 pt-2.5 mt-1 border-t border-outline-variant/15">
                             <div className="flex items-center justify-between">
                               <span className="text-sm font-semibold text-on-surface">Total</span>
                               <span className="text-sm font-bold text-on-surface">{(total / 1000).toFixed(1)}T</span>
@@ -331,10 +333,10 @@ export const RankingsPage: React.FC<RankingsPageProps> = ({ className = "" }) =>
             >
               stacked_bar_chart
             </span>
-            <h2 className="text-2xl font-headline font-bold">Market Share</h2>
+            <h2 className="text-2xl font-headline font-bold">{t("rankings.market_share")}</h2>
           </div>
           <p className="text-on-surface-variant text-sm">
-            Compare NexusAI token share by model author
+            {t("rankings.market_share_desc", "Compare NexusAI token share by model author")}
           </p>
 
           <div className="flex mt-4">
@@ -374,8 +376,8 @@ export const RankingsPage: React.FC<RankingsPageProps> = ({ className = "" }) =>
                     ))}
                     {/* Tooltip */}
                     <div className="absolute top-0 left-1/2 -translate-x-1/2 hidden group-hover:block z-20 pointer-events-none">
-                      <div className="bg-white rounded-xl shadow-xl border border-slate-200 py-3 w-52">
-                        <div className="px-4 pb-2.5 mb-1 border-b border-slate-100">
+                      <div className="bg-surface-container-lowest rounded-xl shadow-xl border border-outline-variant/20 py-3 w-52">
+                        <div className="px-4 pb-2.5 mb-1 border-b border-outline-variant/15">
                           <span className="inline-block text-xs font-semibold text-on-surface bg-surface-container-low px-2.5 py-1 rounded-full">
                             {week.date}
                           </span>
@@ -433,13 +435,13 @@ export const RankingsPage: React.FC<RankingsPageProps> = ({ className = "" }) =>
         <section className="space-y-8">
           <div className="flex justify-between items-end">
             <div className="space-y-2">
-              <h2 className="text-3xl font-headline font-bold">Trending Models</h2>
+              <h2 className="text-3xl font-headline font-bold">{t("rankings.trending_models")}</h2>
               <p className="text-on-surface-variant">
-                Global volume and growth trends for the last 24 hours.
+                {t("rankings.trending_desc", "Global volume and growth trends for the last 24 hours.")}
               </p>
             </div>
             <button className="flex items-center gap-2 text-primary font-bold hover:gap-3 transition-all">
-              View Full Leaderboard{" "}
+              {t("rankings.view_full_leaderboard")}{" "}
               <span className="material-symbols-outlined">arrow_forward</span>
             </button>
           </div>
@@ -447,12 +449,12 @@ export const RankingsPage: React.FC<RankingsPageProps> = ({ className = "" }) =>
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-surface-container border-b border-outline-variant/30 text-on-surface-variant font-label text-xs uppercase tracking-widest">
-                  <th className="px-6 py-4 font-semibold">Rank</th>
-                  <th className="px-6 py-4 font-semibold">Model Name</th>
-                  <th className="px-6 py-4 font-semibold">Provider</th>
-                  <th className="px-6 py-4 font-semibold w-1/4">Usage Share</th>
-                  <th className="px-6 py-4 font-semibold">Tokens</th>
-                  <th className="px-6 py-4 font-semibold">Change</th>
+                  <th className="px-6 py-4 font-semibold">{t("rankings.col_rank")}</th>
+                  <th className="px-6 py-4 font-semibold">{t("rankings.col_model_name")}</th>
+                  <th className="px-6 py-4 font-semibold">{t("rankings.col_provider")}</th>
+                  <th className="px-6 py-4 font-semibold w-1/4">{t("rankings.col_usage_share")}</th>
+                  <th className="px-6 py-4 font-semibold">{t("rankings.col_tokens")}</th>
+                  <th className="px-6 py-4 font-semibold">{t("rankings.col_change")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-surface-container">
@@ -483,9 +485,9 @@ export const RankingsPage: React.FC<RankingsPageProps> = ({ className = "" }) =>
         {/* Market Share */}
         <section className="bg-surface-container-low rounded-xl p-8 space-y-8">
           <div className="space-y-2">
-            <h2 className="text-2xl font-headline font-bold">Provider Market Share</h2>
+            <h2 className="text-2xl font-headline font-bold">{t("rankings.provider_market_share")}</h2>
             <p className="text-on-surface-variant">
-              Token volume distribution by organizational group.
+              {t("rankings.provider_market_share_desc", "Token volume distribution by organizational group.")}
             </p>
           </div>
           <div className="space-y-4">
@@ -518,18 +520,18 @@ export const RankingsPage: React.FC<RankingsPageProps> = ({ className = "" }) =>
 
         {/* Categories Grid */}
         <section className="space-y-8">
-          <h2 className="text-3xl font-headline font-bold">Performance by Category</h2>
+          <h2 className="text-3xl font-headline font-bold">{t("rankings.performance_by_category")}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {CATEGORIES.map((cat) => (
               <div
-                key={cat.title}
+                key={cat.titleKey}
                 className="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/10 space-y-4"
               >
                 <div className="flex items-center gap-3">
                   <span className="material-symbols-outlined text-primary bg-primary/10 p-2 rounded-lg">
                     {cat.icon}
                   </span>
-                  <h3 className="font-bold text-lg">{cat.title}</h3>
+                  <h3 className="font-bold text-lg">{t(cat.titleKey)}</h3>
                 </div>
                 <div className="space-y-3">
                   {cat.items.map((item) => (
@@ -548,7 +550,7 @@ export const RankingsPage: React.FC<RankingsPageProps> = ({ className = "" }) =>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Natural Languages */}
           <section className="space-y-6">
-            <h3 className="text-2xl font-headline font-bold">Natural Languages</h3>
+            <h3 className="text-2xl font-headline font-bold">{t("rankings.natural_languages")}</h3>
             <div className="flex border-b border-outline-variant/30 gap-6">
               {NAT_LANGUAGES.map((lang, i) => (
                 <button
@@ -579,7 +581,7 @@ export const RankingsPage: React.FC<RankingsPageProps> = ({ className = "" }) =>
 
           {/* Programming Languages */}
           <section className="space-y-6">
-            <h3 className="text-2xl font-headline font-bold">Programming Languages</h3>
+            <h3 className="text-2xl font-headline font-bold">{t("rankings.programming_languages")}</h3>
             <div className="flex border-b border-outline-variant/30 gap-6">
               {PROG_LANGUAGES.map((lang, i) => (
                 <button

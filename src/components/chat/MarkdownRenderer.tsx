@@ -1,4 +1,5 @@
 import { useState, useCallback, type ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 
 interface MarkdownRendererProps {
   readonly content: string;
@@ -6,6 +7,7 @@ interface MarkdownRendererProps {
 }
 
 function CopyButton({ code }: { readonly code: string }) {
+  const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
 
   const handleCopy = useCallback(() => {
@@ -20,12 +22,12 @@ function CopyButton({ code }: { readonly code: string }) {
       className="absolute top-2 right-2 flex items-center gap-1 px-2 py-1 rounded-md bg-slate-700 hover:bg-slate-600 text-slate-300 text-xs transition-colors"
     >
       <span
-        className="material-symbols-outlined text-[14px]"
-        style={{ fontVariationSettings: "'wght' 300" }}
+        className="material-symbols-outlined"
+        style={{ fontSize: 14, fontVariationSettings: "'wght' 300" }}
       >
         {copied ? "check" : "content_copy"}
       </span>
-      {copied ? "Copied!" : "Copy"}
+      {copied ? t("chat.copied") : t("chat.copy")}
     </button>
   );
 }

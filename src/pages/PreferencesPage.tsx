@@ -1,11 +1,14 @@
+import { useState, useCallback, type ChangeEvent } from "react";
+import { useTranslation } from "react-i18next";
 import SettingsLayout from "../components/SettingsLayout";
+import { useTheme } from "../contexts/ThemeContext";
 
 const NOTIFICATION_SETTINGS = [
-  { label: "Usage alerts", desc: "Get notified when spending exceeds thresholds", enabled: true },
-  { label: "Model updates", desc: "New model releases and deprecation notices", enabled: true },
-  { label: "Security alerts", desc: "Unusual activity or failed authentication attempts", enabled: true },
-  { label: "Marketing emails", desc: "Product tips, case studies, and promotions", enabled: false },
-  { label: "Weekly digest", desc: "Summary of usage, costs, and performance metrics", enabled: false },
+  { labelKey: "preferences.notif_usage_alerts", descKey: "preferences.notif_usage_alerts_desc", id: "usage_alerts", enabled: true },
+  { labelKey: "preferences.notif_model_updates", descKey: "preferences.notif_model_updates_desc", id: "model_updates", enabled: true },
+  { labelKey: "preferences.notif_security", descKey: "preferences.notif_security_desc", id: "security", enabled: true },
+  { labelKey: "preferences.notif_marketing", descKey: "preferences.notif_marketing_desc", id: "marketing", enabled: false },
+  { labelKey: "preferences.notif_weekly_digest", descKey: "preferences.notif_weekly_digest_desc", id: "weekly_digest", enabled: false },
 ];
 
 const TIMEZONE_OPTIONS = [
@@ -17,47 +20,64 @@ const TIMEZONE_OPTIONS = [
   "Asia/Tokyo (JST)",
 ];
 
-const TEAM_MEMBERS = [
-  { name: "Wang Xing", email: "wangxing@nexusai.dev", role: "Owner", avatar: "WX" },
-  { name: "Sarah Chen", email: "sarah@nexusai.dev", role: "Admin", avatar: "SC" },
-  { name: "Alex Kim", email: "alex@nexusai.dev", role: "Developer", avatar: "AK" },
-  { name: "CI Bot", email: "ci@nexusai.dev", role: "Service Account", avatar: "CI" },
-];
 
 export default function PreferencesPage() {
+  const { t, i18n } = useTranslation();
+  const { theme, setTheme, resolved } = useTheme();
+  const darkMode = resolved === "dark";
+  const [compactLayout, setCompactLayout] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [notifications, setNotifications] = useState<Record<string, boolean>>(() => {
+    const init: Record<string, boolean> = {};
+    for (const item of NOTIFICATION_SETTINGS) init[item.id] = item.enabled;
+    return init;
+  });
+
+  const handleAvatarChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    setAvatarUrl(url);
+  }, []);
+
   return (
     <SettingsLayout activeTab="preferences">
       <div className="flex-1 p-4 sm:p-6 md:p-10 max-w-6xl w-full mx-auto">
         {/* Page Title */}
         <div className="mb-8">
-          <h2 className="text-2xl sm:text-3xl font-bold font-headline tracking-tight mb-2">Preferences</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold font-headline tracking-tight mb-2">{t("preferences.title")}</h2>
           <p className="text-on-surface-variant text-sm">
-            Configure your account settings, notifications, and team access.
+            {t("preferences.subtitle")}
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
-          {/* Left Column - Settings */}
-          <div className="lg:col-span-2 space-y-6 sm:space-y-8">
+        <div className="space-y-6 sm:space-y-8">
             {/* Profile Section */}
             <div className="bg-surface-container-lowest rounded-xl overflow-hidden">
               <div className="px-5 sm:px-6 py-4 border-b border-outline-variant/10">
-                <h4 className="font-headline font-bold text-lg">Profile</h4>
+                <h4 className="font-headline font-bold text-lg">{t("preferences.section_profile")}</h4>
               </div>
               <div className="p-5 sm:p-6 space-y-6">
                 <div className="flex items-center gap-6">
-                  <div className="w-16 h-16 rounded-full bg-primary text-white flex items-center justify-center text-xl font-bold ring-4 ring-primary/10">
-                    WX
-                  </div>
+                  {avatarUrl ? (
+                    <img src={avatarUrl} alt="Avatar" className="w-16 h-16 rounded-full object-cover ring-4 ring-primary/10" />
+                  ) : (
+                    <div className="w-16 h-16 rounded-full bg-primary text-on-primary flex items-center justify-center text-xl font-bold ring-4 ring-primary/10">
+                      WX
+                    </div>
+                  )}
                   <div>
-                    <button className="text-xs text-primary font-semibold hover:underline">Change avatar</button>
-                    <p className="text-[10px] text-on-surface-variant mt-1">JPG, PNG or GIF. Max 2MB.</p>
+                    <label className="text-xs text-primary font-semibold hover:underline cursor-pointer">
+                      {t("preferences.change_avatar")}
+                      <input type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
+                    </label>
+                    <p className="text-[10px] text-on-surface-variant mt-1">{t("preferences.avatar_hint")}</p>
                   </div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant block mb-1.5">
-                      Display Name
+                      {t("preferences.label_display_name")}
                     </label>
                     <input
                       type="text"
@@ -67,7 +87,7 @@ export default function PreferencesPage() {
                   </div>
                   <div>
                     <label className="text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant block mb-1.5">
-                      Email
+                      {t("preferences.label_email")}
                     </label>
                     <input
                       type="email"
@@ -78,7 +98,7 @@ export default function PreferencesPage() {
                 </div>
                 <div>
                   <label className="text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant block mb-1.5">
-                    Organization
+                    {t("preferences.label_organization")}
                   </label>
                   <input
                     type="text"
@@ -92,13 +112,13 @@ export default function PreferencesPage() {
             {/* General Settings */}
             <div className="bg-surface-container-lowest rounded-xl overflow-hidden">
               <div className="px-5 sm:px-6 py-4 border-b border-outline-variant/10">
-                <h4 className="font-headline font-bold text-lg">General</h4>
+                <h4 className="font-headline font-bold text-lg">{t("preferences.section_general")}</h4>
               </div>
               <div className="p-5 sm:p-6 space-y-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant block mb-1.5">
-                      Timezone
+                      {t("preferences.label_timezone")}
                     </label>
                     <div className="relative">
                       <select className="w-full appearance-none bg-surface-container-lowest rounded-lg px-3 py-2 pr-10 text-sm border border-outline-variant/10 focus:ring-1 focus:ring-primary/30 focus:outline-none transition-all">
@@ -106,23 +126,25 @@ export default function PreferencesPage() {
                           <option key={tz}>{tz}</option>
                         ))}
                       </select>
-                      <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant text-[18px]">
+                      <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant" style={{ fontSize: 18 }}>
                         expand_more
                       </span>
                     </div>
                   </div>
                   <div>
                     <label className="text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant block mb-1.5">
-                      Language
+                      {t("preferences.label_language")}
                     </label>
                     <div className="relative">
-                      <select className="w-full appearance-none bg-surface-container-lowest rounded-lg px-3 py-2 pr-10 text-sm border border-outline-variant/10 focus:ring-1 focus:ring-primary/30 focus:outline-none transition-all">
-                        <option>English</option>
-                        <option>中文 (简体)</option>
-                        <option>日本語</option>
-                        <option>한국어</option>
+                      <select
+                        value={i18n.language.startsWith('zh') ? 'zh' : 'en'}
+                        onChange={(e) => i18n.changeLanguage(e.target.value)}
+                        className="w-full appearance-none bg-surface-container-lowest rounded-lg px-3 py-2 pr-10 text-sm border border-outline-variant/10 focus:ring-1 focus:ring-primary/30 focus:outline-none transition-all"
+                      >
+                        <option value="en">English</option>
+                        <option value="zh">中文 (简体)</option>
                       </select>
-                      <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant text-[18px]">
+                      <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant" style={{ fontSize: 18 }}>
                         expand_more
                       </span>
                     </div>
@@ -130,7 +152,7 @@ export default function PreferencesPage() {
                 </div>
                 <div>
                   <label className="text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant block mb-1.5">
-                    Default Model
+                    {t("preferences.label_default_model")}
                   </label>
                   <div className="relative">
                     <select className="w-full appearance-none bg-surface-container-lowest rounded-lg px-3 py-2 pr-10 text-sm border border-outline-variant/10 focus:ring-1 focus:ring-primary/30 focus:outline-none transition-all">
@@ -139,27 +161,27 @@ export default function PreferencesPage() {
                       <option>Google: Gemini 1.5 Pro</option>
                       <option>Meta: Llama 3.1 405B</option>
                     </select>
-                    <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant text-[18px]">
+                    <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant" style={{ fontSize: 18 }}>
                       expand_more
                     </span>
                   </div>
                 </div>
                 <div className="flex items-center justify-between py-3 border-t border-outline-variant/10">
                   <div>
-                    <p className="text-sm font-medium">Dark Mode</p>
-                    <p className="text-xs text-on-surface-variant">Use dark theme for the dashboard</p>
+                    <p className="text-sm font-medium">{t("preferences.toggle_dark_mode")}</p>
+                    <p className="text-xs text-on-surface-variant">{t("preferences.toggle_dark_mode_desc")}</p>
                   </div>
-                  <div className="w-10 h-5 bg-surface-container-highest rounded-full relative cursor-pointer">
-                    <div className="w-4 h-4 bg-white rounded-full absolute left-0.5 top-0.5 shadow-sm" />
+                  <div onClick={() => setTheme(darkMode ? "light" : "dark")} className={`w-10 h-5 rounded-full relative cursor-pointer transition-colors ${darkMode ? "bg-primary" : "bg-surface-container-highest"}`}>
+                    <div className={`w-4 h-4 bg-white rounded-full absolute top-0.5 shadow-sm transition-all ${darkMode ? "right-0.5" : "left-0.5"}`} />
                   </div>
                 </div>
                 <div className="flex items-center justify-between py-3 border-t border-outline-variant/10">
                   <div>
-                    <p className="text-sm font-medium">Compact Layout</p>
-                    <p className="text-xs text-on-surface-variant">Reduce spacing in tables and lists</p>
+                    <p className="text-sm font-medium">{t("preferences.toggle_compact_layout")}</p>
+                    <p className="text-xs text-on-surface-variant">{t("preferences.toggle_compact_layout_desc")}</p>
                   </div>
-                  <div className="w-10 h-5 bg-surface-container-highest rounded-full relative cursor-pointer">
-                    <div className="w-4 h-4 bg-white rounded-full absolute left-0.5 top-0.5 shadow-sm" />
+                  <div onClick={() => setCompactLayout((p) => !p)} className={`w-10 h-5 rounded-full relative cursor-pointer transition-colors ${compactLayout ? "bg-primary" : "bg-surface-container-highest"}`}>
+                    <div className={`w-4 h-4 bg-white rounded-full absolute top-0.5 shadow-sm transition-all ${compactLayout ? "right-0.5" : "left-0.5"}`} />
                   </div>
                 </div>
               </div>
@@ -168,17 +190,20 @@ export default function PreferencesPage() {
             {/* Notifications */}
             <div className="bg-surface-container-lowest rounded-xl overflow-hidden">
               <div className="px-5 sm:px-6 py-4 border-b border-outline-variant/10">
-                <h4 className="font-headline font-bold text-lg">Notifications</h4>
+                <h4 className="font-headline font-bold text-lg">{t("preferences.section_notifications")}</h4>
               </div>
               <div className="divide-y divide-outline-variant/10">
                 {NOTIFICATION_SETTINGS.map((item) => (
-                  <div key={item.label} className="flex items-center justify-between px-5 sm:px-6 py-4">
+                  <div key={item.id} className="flex items-center justify-between px-5 sm:px-6 py-4">
                     <div>
-                      <p className="text-sm font-medium">{item.label}</p>
-                      <p className="text-xs text-on-surface-variant mt-0.5">{item.desc}</p>
+                      <p className="text-sm font-medium">{t(item.labelKey)}</p>
+                      <p className="text-xs text-on-surface-variant mt-0.5">{t(item.descKey)}</p>
                     </div>
-                    <div className={`w-10 h-5 rounded-full relative cursor-pointer ${item.enabled ? "bg-primary" : "bg-surface-container-highest"}`}>
-                      <div className={`w-4 h-4 bg-white rounded-full absolute top-0.5 shadow-sm ${item.enabled ? "right-0.5" : "left-0.5"}`} />
+                    <div
+                      onClick={() => setNotifications((prev) => ({ ...prev, [item.id]: !prev[item.id] }))}
+                      className={`w-10 h-5 rounded-full relative cursor-pointer transition-colors ${notifications[item.id] ? "bg-primary" : "bg-surface-container-highest"}`}
+                    >
+                      <div className={`w-4 h-4 bg-white rounded-full absolute top-0.5 shadow-sm transition-all ${notifications[item.id] ? "right-0.5" : "left-0.5"}`} />
                     </div>
                   </div>
                 ))}
@@ -188,80 +213,20 @@ export default function PreferencesPage() {
             {/* Danger Zone */}
             <div className="bg-surface-container-lowest rounded-xl overflow-hidden">
               <div className="px-5 sm:px-6 py-4 border-b border-error/10">
-                <h4 className="font-headline font-bold text-lg text-error">Danger Zone</h4>
+                <h4 className="font-headline font-bold text-lg text-error">{t("preferences.section_danger")}</h4>
               </div>
               <div className="p-5 sm:p-6 space-y-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div>
-                    <p className="text-sm font-medium">Delete Organization</p>
-                    <p className="text-xs text-on-surface-variant">Permanently remove all data, keys, and configurations</p>
+                    <p className="text-sm font-medium">{t("preferences.delete_organization")}</p>
+                    <p className="text-xs text-on-surface-variant">{t("preferences.delete_organization_desc")}</p>
                   </div>
                   <button className="px-4 py-2 text-error bg-error/5 text-xs font-semibold rounded-lg hover:bg-error/10 transition-colors w-fit">
-                    Delete Organization
+                    {t("preferences.delete_organization")}
                   </button>
                 </div>
               </div>
             </div>
-          </div>
-
-          {/* Right Column - Team */}
-          <div className="space-y-6">
-            <div className="bg-surface-container-lowest rounded-xl overflow-hidden">
-              <div className="flex justify-between items-center px-5 sm:px-6 py-4 border-b border-outline-variant/10">
-                <h4 className="font-headline font-bold text-lg">Team</h4>
-                <button className="text-xs text-primary font-semibold hover:underline flex items-center gap-1">
-                  <span className="material-symbols-outlined text-[14px]">person_add</span>
-                  Invite
-                </button>
-              </div>
-              <div className="divide-y divide-outline-variant/10">
-                {TEAM_MEMBERS.map((member) => (
-                  <div key={member.email} className="flex items-center gap-3 px-5 sm:px-6 py-4">
-                    <div className={`w-9 h-9 rounded-full flex items-center justify-center text-[11px] font-bold ${member.role === "Owner" ? "bg-primary text-white" : member.role === "Service Account" ? "bg-surface-container text-on-surface-variant" : "bg-primary/8 text-primary"}`}>
-                      {member.avatar}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">{member.name}</p>
-                      <p className="text-[10px] text-on-surface-variant truncate">{member.email}</p>
-                    </div>
-                    <span className={`text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${member.role === "Owner" ? "bg-primary/10 text-primary" : "bg-surface-container text-on-surface-variant"}`}>
-                      {member.role}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Sessions */}
-            <div className="bg-surface-container-lowest rounded-xl overflow-hidden">
-              <div className="px-5 sm:px-6 py-4 border-b border-outline-variant/10">
-                <h4 className="font-headline font-bold text-lg">Active Sessions</h4>
-              </div>
-              <div className="p-5 sm:p-6 space-y-4">
-                <div className="flex items-start gap-3">
-                  <span className="material-symbols-outlined text-primary text-[20px] mt-0.5">computer</span>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">macOS · Chrome</p>
-                    <p className="text-[10px] text-on-surface-variant">192.168.1.42 · Current session</p>
-                  </div>
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 mt-2" />
-                </div>
-                <div className="flex items-start gap-3">
-                  <span className="material-symbols-outlined text-on-surface-variant text-[20px] mt-0.5">phone_iphone</span>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">iOS · Safari</p>
-                    <p className="text-[10px] text-on-surface-variant">10.0.1.15 · 2 days ago</p>
-                  </div>
-                  <button className="text-[10px] text-error font-semibold hover:underline">Revoke</button>
-                </div>
-              </div>
-            </div>
-
-            {/* Save Button */}
-            <button className="w-full py-3 bg-primary text-white font-semibold rounded-lg text-sm hover:opacity-90 transition-opacity">
-              Save Changes
-            </button>
-          </div>
         </div>
       </div>
     </SettingsLayout>

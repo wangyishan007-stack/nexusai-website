@@ -1,8 +1,15 @@
+import { useState, useRef, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import SettingsLayout from "../components/SettingsLayout";
 
 interface ActivityPageProps {
   readonly className?: string;
 }
+
+const FILTER_MODELS = ["All", "Mistral 7B Instruct", "GPT-4 Turbo", "GPT-4o", "Claude 3.5 Sonnet", "Gemini 1.5 Pro"];
+const FILTER_PROVIDERS = ["All", "Mistral", "OpenAI", "Anthropic", "Google"];
+const TIME_RANGES = ["24 Hours", "7 Days", "1 Month", "3 Months"];
+const GROUP_BY = ["By Model", "By API Key", "By Project"];
 
 const USAGE_CARDS = [
   {
@@ -38,6 +45,24 @@ const CHART_BARS = [
 ];
 
 export default function ActivityPage({ className }: ActivityPageProps) {
+  const [showFilters, setShowFilters] = useState(false);
+  const [filterModel, setFilterModel] = useState("All");
+  const [filterProvider, setFilterProvider] = useState("All");
+  const [timeRange, setTimeRange] = useState("1 Month");
+  const [groupBy, setGroupBy] = useState("By Model");
+  const filtersRef = useRef<HTMLDivElement>(null);
+
+  const hasActiveFilters = filterModel !== "All" || filterProvider !== "All";
+
+  useEffect(() => {
+    if (!showFilters) return;
+    const handler = (e: MouseEvent) => {
+      if (filtersRef.current && !filtersRef.current.contains(e.target as Node)) setShowFilters(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [showFilters]);
+
   return (
     <SettingsLayout activeTab="activity" className={className}>
       <div className="flex-1 p-4 sm:p-6 md:p-10 max-w-6xl w-full mx-auto">
@@ -50,27 +75,96 @@ export default function ActivityPage({ className }: ActivityPageProps) {
             </p>
           </div>
           <div className="flex flex-wrap gap-2 sm:gap-3">
-            <button className="flex items-center gap-1.5 px-3 py-1.5 bg-surface-container rounded-lg text-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors">
-              <span className="material-symbols-outlined text-[16px]">filter_list</span>
-              Filters
-            </button>
+            {/* Filters button + dropdown */}
+            <div className="relative" ref={filtersRef}>
+              <button
+                onClick={() => setShowFilters((v) => !v)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm border transition-colors ${
+                  showFilters
+                    ? "bg-primary/8 text-primary border-primary"
+                    : "bg-surface-container-lowest text-on-surface-variant hover:text-on-surface border-outline-variant/20"
+                }`}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: 16 }}>filter_list</span>
+                Filters
+                {hasActiveFilters && (
+                  <span className="ml-1 w-2 h-2 bg-primary rounded-full" />
+                )}
+              </button>
+              {showFilters && (
+                <div className="absolute right-0 top-full mt-2 w-72 bg-surface-container-lowest border border-outline-variant/20 rounded-xl shadow-lg z-30 p-4 space-y-3">
+                  {/* Models */}
+                  <div className="relative">
+                    <select
+                      value={filterModel}
+                      onChange={(e) => setFilterModel(e.target.value)}
+                      className="w-full appearance-none px-3 py-2.5 bg-surface-container-lowest border border-outline-variant/20 rounded-lg text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all cursor-pointer pr-8"
+                    >
+                      {FILTER_MODELS.map((m) => (
+                        <option key={m} value={m}>{m === "All" ? "Models" : m}</option>
+                      ))}
+                    </select>
+                    <span className="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none" style={{ fontSize: 18 }}>unfold_more</span>
+                  </div>
+                  {/* Providers */}
+                  <div className="relative">
+                    <select
+                      value={filterProvider}
+                      onChange={(e) => setFilterProvider(e.target.value)}
+                      className="w-full appearance-none px-3 py-2.5 bg-surface-container-lowest border border-outline-variant/20 rounded-lg text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all cursor-pointer pr-8"
+                    >
+                      {FILTER_PROVIDERS.map((p) => (
+                        <option key={p} value={p}>{p === "All" ? "Providers" : p}</option>
+                      ))}
+                    </select>
+                    <span className="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none" style={{ fontSize: 18 }}>unfold_more</span>
+                  </div>
+                  {/* API Keys */}
+                  <div className="relative">
+                    <select
+                      className="w-full appearance-none px-3 py-2.5 bg-surface-container-lowest border border-outline-variant/20 rounded-lg text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all cursor-pointer pr-8"
+                      defaultValue="All"
+                    >
+                      <option value="All">API Keys</option>
+                    </select>
+                    <span className="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none" style={{ fontSize: 18 }}>unfold_more</span>
+                  </div>
+                  <button
+                    onClick={() => setShowFilters(false)}
+                    className="w-full py-2 bg-primary text-on-primary font-semibold rounded-lg text-sm hover:opacity-90 transition-opacity"
+                  >
+                    Apply
+                  </button>
+                </div>
+              )}
+            </div>
+            {/* Time Range */}
             <div className="relative">
-              <select className="appearance-none bg-surface-container text-on-surface-variant hover:text-on-surface pl-3 pr-8 py-1.5 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-primary/30 transition-all">
-                <option>1 Month</option>
-                <option>7 Days</option>
-                <option>24 Hours</option>
+              <select
+                value={timeRange}
+                onChange={(e) => setTimeRange(e.target.value)}
+                className="appearance-none bg-surface-container-lowest border border-outline-variant/20 text-on-surface-variant hover:text-on-surface pl-3 pr-8 py-1.5 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-primary/30 transition-all cursor-pointer"
+              >
+                {TIME_RANGES.map((t) => (
+                  <option key={t} value={t}>{t}</option>
+                ))}
               </select>
-              <span className="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant text-[16px]">
+              <span className="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant" style={{ fontSize: 16 }}>
                 expand_more
               </span>
             </div>
+            {/* Group By */}
             <div className="relative">
-              <select className="appearance-none bg-surface-container text-on-surface-variant hover:text-on-surface pl-3 pr-8 py-1.5 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-primary/30 transition-all">
-                <option>By Model</option>
-                <option>By API Key</option>
-                <option>By Project</option>
+              <select
+                value={groupBy}
+                onChange={(e) => setGroupBy(e.target.value)}
+                className="appearance-none bg-surface-container-lowest border border-outline-variant/20 text-on-surface-variant hover:text-on-surface pl-3 pr-8 py-1.5 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-primary/30 transition-all cursor-pointer"
+              >
+                {GROUP_BY.map((g) => (
+                  <option key={g} value={g}>{g}</option>
+                ))}
               </select>
-              <span className="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant text-[16px]">
+              <span className="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant" style={{ fontSize: 16 }}>
                 expand_more
               </span>
             </div>
@@ -87,7 +181,7 @@ export default function ActivityPage({ className }: ActivityPageProps) {
           </span>
           <p className="text-sm text-on-surface">
             Logs have moved. Your API request logs now have their own{" "}
-            <a className="text-primary font-semibold hover:underline" href="#">
+            <a className="text-primary font-semibold hover:underline" href="/settings/logs">
               dedicated page
             </a>
             .
@@ -203,53 +297,12 @@ export default function ActivityPage({ className }: ActivityPageProps) {
                 </div>
               </div>
             </div>
-            <button className="w-full mt-8 py-3 bg-surface-container text-primary text-sm font-semibold rounded-lg hover:bg-surface-container-high transition-colors">
+            <a href="/settings/logs" className="block w-full mt-8 py-3 bg-surface-container text-primary text-sm font-semibold rounded-lg hover:bg-surface-container-high transition-colors text-center">
               View detailed metrics
-            </button>
+            </a>
           </div>
         </div>
 
-        {/* Feature Highlight / Export Section */}
-        <div className="mt-8 sm:mt-12 grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 items-center bg-surface-container-lowest rounded-xl p-6 sm:p-8">
-          <div>
-            <span className="bg-primary text-white text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded mb-4 inline-block">
-              Pro Feature
-            </span>
-            <h3 className="text-xl sm:text-2xl font-bold font-headline mb-4">Export Usage Reports</h3>
-            <p className="text-on-surface-variant text-sm leading-relaxed mb-6">
-              Need to share billing details with your team? Generate detailed CSV or PDF reports of
-              all model activity, token usage, and costs across your entire organization.
-            </p>
-            <div className="flex flex-wrap gap-3">
-              <button className="px-5 py-2.5 bg-primary text-white font-semibold rounded-lg text-sm hover:opacity-90 transition-opacity flex items-center gap-2">
-                <span className="material-symbols-outlined text-[18px]">download</span>
-                Download CSV
-              </button>
-              <button className="px-5 py-2.5 bg-surface-container text-on-surface-variant font-semibold rounded-lg text-sm hover:text-on-surface hover:bg-surface-container-high transition-colors">
-                Preview PDF
-              </button>
-            </div>
-          </div>
-          <div className="relative h-48 sm:h-64 bg-surface-container/50 rounded-xl overflow-hidden flex items-center justify-center">
-            <div
-              className="absolute inset-0 opacity-10 pointer-events-none"
-              style={{
-                backgroundImage: "radial-gradient(#004ac6 1px, transparent 1px)",
-                backgroundSize: "20px 20px",
-              }}
-            />
-            <div className="z-10 text-center">
-              <span className="material-symbols-outlined text-[48px] text-primary/30 mb-3">
-                analytics
-              </span>
-              <p className="text-xs font-medium text-on-surface-variant">
-                Visualizing your efficiency pipeline...
-              </p>
-            </div>
-            <div className="absolute top-4 right-4 w-24 h-24 bg-primary/5 rounded-full blur-2xl" />
-            <div className="absolute bottom-4 left-4 w-32 h-32 bg-surface-container/20 rounded-full blur-2xl" />
-          </div>
-        </div>
       </div>
     </SettingsLayout>
   );

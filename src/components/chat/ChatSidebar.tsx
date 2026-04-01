@@ -1,6 +1,15 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import type { FC, KeyboardEvent as ReactKeyboardEvent } from "react";
+import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import type { Conversation } from "../../data/chatModels";
+
+const GROUP_LABEL_KEYS: Record<string, string> = {
+  Today: "chat.group_today",
+  Yesterday: "chat.group_yesterday",
+  "Previous 7 Days": "chat.group_previous_7_days",
+  Older: "chat.group_older",
+};
 
 interface ChatSidebarProps {
   readonly conversations: Conversation[];
@@ -64,6 +73,7 @@ const ConversationItem: FC<ConversationItemProps> = ({
   onDelete,
   onRename,
 }) => {
+  const { t } = useTranslation();
   const [isRenaming, setIsRenaming] = useState(false);
   const [renameValue, setRenameValue] = useState(conversation.title);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -179,9 +189,9 @@ const ConversationItem: FC<ConversationItemProps> = ({
             type="button"
             onClick={handleStartRename}
             className="p-1 rounded hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface transition-colors"
-            title="Rename"
+            title={t("chat.rename")}
           >
-            <span className="material-symbols-outlined text-[14px]" style={{ fontVariationSettings: "'wght' 300" }}>edit</span>
+            <span className="material-symbols-outlined" style={{ fontSize: 14, fontVariationSettings: "'wght' 300" }}>edit</span>
           </button>
           <button
             type="button"
@@ -191,9 +201,9 @@ const ConversationItem: FC<ConversationItemProps> = ({
                 ? "text-error hover:bg-error/8"
                 : "text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high"
             }`}
-            title={confirmDelete ? "Click again to confirm" : "Delete"}
+            title={confirmDelete ? t("chat.click_again_to_confirm") : t("chat.delete")}
           >
-            <span className="material-symbols-outlined text-[14px]" style={{ fontVariationSettings: "'wght' 300" }}>
+            <span className="material-symbols-outlined" style={{ fontSize: 14, fontVariationSettings: "'wght' 300" }}>
               delete_outline
             </span>
           </button>
@@ -211,6 +221,8 @@ export const ChatSidebar: FC<ChatSidebarProps> = ({
   onDelete,
   onRename,
 }) => {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
 
   const filtered = searchQuery.trim()
@@ -225,14 +237,14 @@ export const ChatSidebar: FC<ChatSidebarProps> = ({
     <aside
       className={`flex flex-col bg-surface-container-low border-r border-outline-variant/10 shrink-0 transition-all duration-200 overflow-hidden ${
         isOpen ? "w-72" : "w-0"
-      }`}
+      } max-md:absolute max-md:inset-y-0 max-md:left-0 max-md:z-40 max-md:shadow-xl`}
     >
       <div className="flex flex-col h-full w-72">
         {/* Search */}
         <div className="px-4 pt-4 pb-2">
           <input
             type="text"
-            placeholder="Search rooms..."
+            placeholder={t("chat.search_rooms")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full bg-surface-container-lowest border border-outline-variant/20 rounded-lg px-3 py-2.5 text-sm focus:ring-1 focus:ring-primary transition-all placeholder:text-outline outline-none"
@@ -244,15 +256,15 @@ export const ChatSidebar: FC<ChatSidebarProps> = ({
           {groups.length === 0 && (
             <div className="text-center text-sm text-on-surface-variant opacity-60 mt-8 px-4">
               {searchQuery.trim()
-                ? "No conversations found"
-                : "No conversations yet"}
+                ? t("chat.no_conversations_found")
+                : t("chat.no_conversations_yet")}
             </div>
           )}
 
           {groups.map((group) => (
             <div key={group.label} className="mb-3">
               <span className="px-4 text-[10px] uppercase tracking-[0.1em] font-bold text-on-surface-variant opacity-70">
-                {group.label}
+                {GROUP_LABEL_KEYS[group.label] ? t(GROUP_LABEL_KEYS[group.label]) : group.label}
               </span>
               <div className="mt-1.5">
                 {group.items.map((convo) => (
@@ -272,9 +284,15 @@ export const ChatSidebar: FC<ChatSidebarProps> = ({
 
         {/* Bottom help */}
         <div className="pt-3 mt-auto border-t border-outline-variant/10 px-4 pb-4 shrink-0">
-          <div className="flex items-center gap-3 px-2 py-2 cursor-pointer text-on-surface-variant hover:text-on-surface transition-colors rounded-lg hover:bg-surface-container">
+          <div
+            role="button"
+            tabIndex={0}
+            onClick={() => navigate("/docs")}
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") navigate("/docs"); }}
+            className="flex items-center gap-3 px-2 py-2 cursor-pointer text-on-surface-variant hover:text-on-surface transition-colors rounded-lg hover:bg-surface-container"
+          >
             <span className="material-symbols-outlined text-lg" style={{ fontVariationSettings: "'wght' 300" }}>help</span>
-            <span className="text-sm">Help</span>
+            <span className="text-sm">{t("chat.help")}</span>
           </div>
         </div>
       </div>

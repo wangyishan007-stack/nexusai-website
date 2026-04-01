@@ -1,7 +1,9 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { NAV_LINKS } from "../data/mockData";
 import { useAuth } from "../hooks/useAuth";
+import { useTheme } from "../contexts/ThemeContext";
 import { LoginModal } from "../components/LoginModal";
 import { AVAILABLE_MODELS } from "../data/chatModels";
 import { useChat } from "../hooks/useChat";
@@ -16,6 +18,7 @@ interface ChatPageProps {
 }
 
 export const ChatPage: React.FC<ChatPageProps> = ({ className = "" }) => {
+  const { t } = useTranslation();
   const { pathname } = useLocation();
 
   const {
@@ -34,10 +37,12 @@ export const ChatPage: React.FC<ChatPageProps> = ({ className = "" }) => {
     regenerateLastResponse,
   } = useChat();
 
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth >= 768);
   const [openTabIds, setOpenTabIds] = useState<string[]>([]);
   const [modelModalOpen, setModelModalOpen] = useState(false);
+  const [showMobileNav, setShowMobileNav] = useState(false);
   const { isLoggedIn, login, logout } = useAuth();
+  const { theme, setTheme } = useTheme();
   const [showLogin, setShowLogin] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -122,20 +127,32 @@ export const ChatPage: React.FC<ChatPageProps> = ({ className = "" }) => {
       className={`bg-surface text-on-background h-screen flex flex-col overflow-hidden ${className}`}
     >
       {/* Header */}
-      <header className="shrink-0 bg-surface-container-lowest/80 backdrop-blur-md border-b border-outline-variant/10">
-        <div className="flex items-center justify-between px-6 h-16 max-w-[1600px] mx-auto">
-          <Link
-            to="/"
-            className="text-xl font-extrabold tracking-tight text-on-surface font-headline"
-          >
-            NexusAI
-          </Link>
+      <header className="shrink-0 bg-surface-container-lowest/80 backdrop-blur-md border-b border-outline-variant/10 relative z-50">
+        <div className="flex items-center justify-between px-3 sm:px-6 h-14 sm:h-16 max-w-[1600px] mx-auto">
+          <div className="flex items-center gap-2">
+            {/* Mobile hamburger */}
+            <button
+              type="button"
+              onClick={() => setShowMobileNav((prev) => !prev)}
+              className="md:hidden p-1.5 rounded-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors"
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: 22 }}>
+                {showMobileNav ? "close" : "menu"}
+              </span>
+            </button>
+            <Link
+              to="/"
+              className="text-xl font-extrabold tracking-tight text-on-surface font-headline"
+            >
+              NexusAI
+            </Link>
+          </div>
           <div className="hidden md:flex items-center gap-8">
             {visibleLinks.map((link) => {
               const isActive = pathname.startsWith(link.href);
               return (
                 <Link
-                  key={link.label}
+                  key={link.labelKey}
                   to={link.href}
                   className={`text-sm font-medium tracking-wide transition-colors ${
                     isActive
@@ -143,7 +160,7 @@ export const ChatPage: React.FC<ChatPageProps> = ({ className = "" }) => {
                       : "text-on-surface-variant hover:text-on-surface"
                   }`}
                 >
-                  {link.label}
+                  {t(link.labelKey)}
                 </Link>
               );
             })}
@@ -157,38 +174,51 @@ export const ChatPage: React.FC<ChatPageProps> = ({ className = "" }) => {
                 x
               </button>
               {showUserMenu && (
-                <div className="absolute right-0 top-full mt-2 w-56 bg-surface-container-lowest rounded-xl shadow-xl overflow-hidden py-1 z-50">
+                <div className="absolute right-0 top-full mt-2 w-56 bg-surface-container-lowest rounded-xl shadow-xl overflow-hidden py-1 z-[100]">
                   <div className="flex items-center gap-3 px-4 py-3 border-b border-outline-variant/10">
                     <div className="w-9 h-9 rounded-full bg-rose-800 text-white flex items-center justify-center text-sm font-bold">x</div>
-                    <span className="font-semibold text-on-surface">Personal</span>
+                    <span className="font-semibold text-on-surface">{t("chat.menu_personal")}</span>
                     <Link to="/settings/preferences" onClick={() => setShowUserMenu(false)} className="ml-auto text-on-surface-variant hover:text-on-surface transition-colors">
                       <span className="material-symbols-outlined text-xl">settings</span>
                     </Link>
                   </div>
                   <div className="py-1">
                     {[
-                      { icon: "bar_chart", label: "Activity", href: "/settings/activity" },
-                      { icon: "format_list_bulleted", label: "Logs", href: "/settings/logs" },
-                      { icon: "credit_card", label: "Credits", href: "/settings/credits" },
-                      { icon: "settings", label: "Settings", href: "/settings/preferences" },
+                      { icon: "bar_chart", labelKey: "chat.menu_activity", href: "/settings/activity" },
+                      { icon: "format_list_bulleted", labelKey: "chat.menu_logs", href: "/settings/logs" },
+                      { icon: "credit_card", labelKey: "chat.menu_credits", href: "/settings/credits" },
+                      { icon: "settings", labelKey: "chat.menu_settings", href: "/settings/preferences" },
                     ].map((item) => (
-                      <Link key={item.label} to={item.href} onClick={() => setShowUserMenu(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-on-surface hover:bg-surface-container/60 transition-colors">
+                      <Link key={item.labelKey} to={item.href} onClick={() => setShowUserMenu(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-on-surface hover:bg-surface-container/60 transition-colors">
                         <span className="material-symbols-outlined text-xl text-on-surface-variant">{item.icon}</span>
-                        {item.label}
+                        {t(item.labelKey)}
                       </Link>
                     ))}
                   </div>
                   <div className="border-t border-outline-variant/10 py-1">
                     <button onClick={() => { logout(); setShowUserMenu(false); }} className="flex items-center gap-3 px-4 py-2.5 text-sm text-error hover:bg-surface-container/60 transition-colors w-full">
                       <span className="material-symbols-outlined text-xl">logout</span>
-                      Sign Out
+                      {t("chat.sign_out")}
                     </button>
                   </div>
                   <div className="border-t border-outline-variant/10 px-3 py-2">
                     <div className="flex items-center bg-surface-container rounded-lg p-0.5">
-                      <button className="flex-1 flex items-center justify-center py-1.5 rounded-md bg-surface-container-lowest shadow-sm text-on-surface text-xs font-medium transition-all"><span className="material-symbols-outlined text-base mr-1">light_mode</span></button>
-                      <button className="flex-1 flex items-center justify-center py-1.5 rounded-md text-on-surface-variant text-xs font-medium hover:text-on-surface transition-all"><span className="material-symbols-outlined text-base mr-1">dark_mode</span></button>
-                      <button className="flex-1 flex items-center justify-center py-1.5 rounded-md text-on-surface-variant text-xs font-medium hover:text-on-surface transition-all"><span className="material-symbols-outlined text-base mr-1">desktop_windows</span></button>
+                      {([["light", "light_mode"], ["dark", "dark_mode"], ["system", "desktop_windows"]] as const).map(([mode, icon]) => (
+                        <button
+                          key={mode}
+                          onClick={() => setTheme(mode)}
+                          className={`flex-1 flex items-center justify-center py-1.5 rounded-md text-xs font-medium transition-all ${
+                            theme === mode
+                              ? "bg-surface-container-lowest shadow-sm text-on-surface"
+                              : "text-on-surface-variant hover:text-on-surface"
+                          }`}
+                        >
+                          <span
+                            className="material-symbols-outlined text-base mr-1"
+                            style={theme === mode ? { fontVariationSettings: "'FILL' 1" } : undefined}
+                          >{icon}</span>
+                        </button>
+                      ))}
                     </div>
                   </div>
                 </div>
@@ -197,14 +227,36 @@ export const ChatPage: React.FC<ChatPageProps> = ({ className = "" }) => {
           ) : (
             <div className="flex items-center gap-3">
               <button onClick={() => setShowLogin(true)} className="text-on-surface-variant hover:text-on-surface transition-colors text-sm font-medium">
-                Sign In
+                {t("chat.sign_in")}
               </button>
               <Link to="/settings/api-keys" className="bg-primary text-on-primary px-4 py-2 rounded-lg text-sm font-semibold hover:opacity-90 active:scale-95 duration-150 transition-all">
-                Get API Key
+                {t("chat.get_api_key")}
               </Link>
             </div>
           )}
         </div>
+        {/* Mobile nav dropdown */}
+        {showMobileNav && (
+          <div className="md:hidden border-t border-outline-variant/10 px-4 py-3 flex flex-col gap-1 bg-surface-container-lowest">
+            {visibleLinks.map((link) => {
+              const isActive = pathname.startsWith(link.href);
+              return (
+                <Link
+                  key={link.labelKey}
+                  to={link.href}
+                  onClick={() => setShowMobileNav(false)}
+                  className={`px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                    isActive
+                      ? "text-primary bg-primary/5"
+                      : "text-on-surface-variant hover:text-on-surface hover:bg-surface-container"
+                  }`}
+                >
+                  {t(link.labelKey)}
+                </Link>
+              );
+            })}
+          </div>
+        )}
       </header>
 
       <LoginModal isOpen={showLogin} onClose={() => setShowLogin(false)} onLogin={handleLogin} />
@@ -230,7 +282,9 @@ export const ChatPage: React.FC<ChatPageProps> = ({ className = "" }) => {
         <button
           type="button"
           onClick={() => {
-            setActiveId(null);
+            const id = createNewChat();
+            setOpenTabIds((prev) => [...prev, id]);
+            setActiveId(id);
           }}
           className={`flex items-center gap-2 px-4 h-9 rounded-lg text-xs font-medium transition-colors shrink-0 mr-1 ${
             activeId === null
@@ -244,8 +298,8 @@ export const ChatPage: React.FC<ChatPageProps> = ({ className = "" }) => {
           >
             edit_square
           </span>
-          <span>New Chat</span>
-          <span className="bg-surface-container-high text-[9px] px-1.5 py-0.5 rounded font-mono">&#8984;/</span>
+          <span>{t("chat.new_chat")}</span>
+          <span className="hidden sm:inline bg-surface-container-high text-[9px] px-1.5 py-0.5 rounded font-mono">&#8984;/</span>
         </button>
 
         {/* Open conversation tabs */}
@@ -318,7 +372,14 @@ export const ChatPage: React.FC<ChatPageProps> = ({ className = "" }) => {
         </button>
       </div>
 
-      <div className="flex flex-1 min-h-0">
+      <div className="flex flex-1 min-h-0 relative">
+        {/* Mobile sidebar overlay */}
+        {sidebarOpen && (
+          <div
+            className="md:hidden fixed inset-0 bg-black/40 z-30"
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
         {/* Sidebar */}
         <ChatSidebar
           conversations={conversations}

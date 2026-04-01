@@ -1,58 +1,61 @@
-import { type ReactNode, useEffect, useState, useRef } from "react";
+import { type ReactNode, useEffect, useState, useRef, useMemo, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { useDisconnect } from "wagmi";
 import { NAV_LINKS } from "../data/mockData";
 import { useAuth } from "../hooks/useAuth";
+import { useTheme } from "../contexts/ThemeContext";
 
 const USER_MENU_ITEMS = [
-  { icon: "bar_chart", label: "Activity", href: "/settings/activity" },
-  { icon: "format_list_bulleted", label: "Logs", href: "/settings/logs" },
-  { icon: "credit_card", label: "Credits", href: "/settings/credits" },
-  { icon: "settings", label: "Settings", href: "/settings/preferences" },
+  { icon: "bar_chart", labelKey: "userMenu.activity", href: "/settings/activity" },
+  { icon: "format_list_bulleted", labelKey: "userMenu.logs", href: "/settings/logs" },
+  { icon: "credit_card", labelKey: "userMenu.credits", href: "/settings/credits" },
+  { icon: "settings", labelKey: "userMenu.settings", href: "/settings/preferences" },
 ];
 
 interface NavItem {
   readonly icon: string;
-  readonly label: string;
+  readonly labelKey: string;
   readonly id: string;
   readonly href: string;
 }
 
 interface NavGroup {
-  readonly title: string;
+  readonly titleKey: string;
   readonly items: readonly NavItem[];
 }
 
 const NAV_GROUPS: readonly NavGroup[] = [
   {
-    title: "Main",
+    titleKey: "settings.main",
     items: [
-      { icon: "vpn_key", label: "API Keys", id: "api-keys", href: "/settings/api-keys" },
-      { icon: "shield", label: "Guardrails", id: "guardrails", href: "/settings/guardrails" },
-      { icon: "key_visualizer", label: "BYOK", id: "byok", href: "/settings/byok" },
-      { icon: "alt_route", label: "Routing", id: "routing", href: "/settings/routing" },
-      { icon: "tune", label: "Presets", id: "presets", href: "/settings/presets" },
-      { icon: "extension", label: "Plugins", id: "plugins", href: "/settings/plugins" },
+      { icon: "vpn_key", labelKey: "settings.apiKeys", id: "api-keys", href: "/settings/api-keys" },
+      { icon: "shield", labelKey: "settings.guardrails", id: "guardrails", href: "/settings/guardrails" },
+      { icon: "key_visualizer", labelKey: "settings.byok", id: "byok", href: "/settings/byok" },
+      { icon: "alt_route", labelKey: "settings.routing", id: "routing", href: "/settings/routing" },
+      { icon: "tune", labelKey: "settings.presets", id: "presets", href: "/settings/presets" },
+      { icon: "extension", labelKey: "settings.plugins", id: "plugins", href: "/settings/plugins" },
     ],
   },
   {
-    title: "Monitoring",
+    titleKey: "settings.monitoring",
     items: [
-      { icon: "monitoring", label: "Observability", id: "observability", href: "/settings/observability" },
-      { icon: "notes", label: "Logs", id: "logs", href: "/settings/logs" },
+      { icon: "monitoring", labelKey: "settings.observability", id: "observability", href: "/settings/observability" },
+      { icon: "notes", labelKey: "settings.logs", id: "logs", href: "/settings/logs" },
     ],
   },
   {
-    title: "Billing",
+    titleKey: "settings.billing",
     items: [
-      { icon: "payments", label: "Activity", id: "activity", href: "/settings/activity" },
-      { icon: "toll", label: "Credits", id: "credits", href: "/settings/credits" },
+      { icon: "payments", labelKey: "settings.activity", id: "activity", href: "/settings/activity" },
+      { icon: "toll", labelKey: "settings.credits", id: "credits", href: "/settings/credits" },
     ],
   },
   {
-    title: "Account",
+    titleKey: "settings.account",
     items: [
-      { icon: "admin_panel_settings", label: "Management Keys", id: "management-keys", href: "/settings/management-keys" },
-      { icon: "settings", label: "Preferences", id: "preferences", href: "/settings/preferences" },
+      { icon: "admin_panel_settings", labelKey: "settings.managementKeys", id: "management-keys", href: "/settings/management-keys" },
+      { icon: "settings", labelKey: "settings.preferences", id: "preferences", href: "/settings/preferences" },
     ],
   },
 ];
@@ -64,11 +67,22 @@ interface SettingsLayoutProps {
 }
 
 export default function SettingsLayout({ activeTab, children, className }: SettingsLayoutProps) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
-  const { isLoggedIn, login, logout } = useAuth();
+  const { isLoggedIn, login, logout, walletAddress, loginMethod, displayName } = useAuth();
+  const { disconnect } = useDisconnect();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showMobileSidebar, setShowMobileSidebar] = useState(false);
+  const { theme, setTheme } = useTheme();
+  const [searchQuery, setSearchQuery] = useState("");
   const menuRef = useRef<HTMLDivElement>(null);
+
+  const handleLogout = useCallback(() => {
+    if (loginMethod === "wallet") disconnect();
+    logout();
+    setShowUserMenu(false);
+    navigate("/");
+  }, [loginMethod, disconnect, logout, navigate]);
 
   // Settings pages are always logged-in state
   useEffect(() => {
@@ -88,6 +102,15 @@ export default function SettingsLayout({ activeTab, children, className }: Setti
   }, [showUserMenu]);
 
   const visibleLinks = NAV_LINKS.filter((link) => link.href !== "/pricing");
+
+  const filteredGroups = useMemo(() => {
+    if (!searchQuery.trim()) return NAV_GROUPS;
+    const q = searchQuery.trim().toLowerCase();
+    return NAV_GROUPS.map((group) => ({
+      ...group,
+      items: group.items.filter((item) => t(item.labelKey).toLowerCase().includes(q)),
+    })).filter((group) => group.items.length > 0);
+  }, [searchQuery, t]);
 
   return (
     <div className={`bg-background text-on-background font-body antialiased ${className ?? ""}`}>
@@ -122,10 +145,10 @@ export default function SettingsLayout({ activeTab, children, className }: Setti
 
         {/* Main Items Cluster */}
         <nav className="flex-1 space-y-6 overflow-y-auto">
-          {NAV_GROUPS.map((group) => (
-            <div key={group.title} className="space-y-1">
+          {filteredGroups.map((group) => (
+            <div key={group.titleKey} className="space-y-1">
               <p className="text-[10px] uppercase tracking-[0.15em] text-on-surface-variant font-bold px-3 mb-2">
-                {group.title}
+                {t(group.titleKey)}
               </p>
               {group.items.map((item) => {
                 const isActive = item.id === activeTab;
@@ -140,8 +163,8 @@ export default function SettingsLayout({ activeTab, children, className }: Setti
                         : "flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:bg-surface-container hover:text-on-surface rounded-lg transition-all duration-200"
                     }
                   >
-                    <span className="material-symbols-outlined text-[20px]">{item.icon}</span>
-                    <span className="text-sm">{item.label}</span>
+                    <span className="material-symbols-outlined" style={{ fontSize: 20 }}>{item.icon}</span>
+                    <span className="text-sm">{t(item.labelKey)}</span>
                   </Link>
                 );
               })}
@@ -161,16 +184,18 @@ export default function SettingsLayout({ activeTab, children, className }: Setti
                 className="md:hidden text-on-surface-variant hover:text-on-surface"
                 onClick={() => setShowMobileSidebar(true)}
               >
-                <span className="material-symbols-outlined text-[22px]">menu</span>
+                <span className="material-symbols-outlined" style={{ fontSize: 22 }}>menu</span>
               </button>
               <div className="relative w-48 sm:w-72">
-              <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">
+              <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant" style={{ fontSize: 18 }}>
                 search
               </span>
               <input
                 className="w-full h-8 pl-9 pr-12 bg-surface-container border-none rounded-lg text-sm focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-on-surface-variant outline-none"
-                placeholder="Search..."
+                placeholder={t("settings.search")}
                 type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
               />
               <div className="absolute right-2 top-1/2 -translate-y-1/2 hidden sm:flex items-center gap-0.5 pointer-events-none">
                 <span className="px-1 py-0.5 border border-outline-variant/30 rounded text-[9px] text-on-surface-variant bg-surface-container-lowest font-medium">⌘</span>
@@ -181,11 +206,11 @@ export default function SettingsLayout({ activeTab, children, className }: Setti
             <nav className="hidden lg:flex items-center gap-6 font-body text-sm font-medium">
               {visibleLinks.map((link) => (
                 <Link
-                  key={link.label}
+                  key={link.labelKey}
                   className="text-on-surface-variant hover:text-on-surface px-2 py-1 rounded-lg transition-all"
                   to={link.href}
                 >
-                  {link.label}
+                  {t(link.labelKey)}
                 </Link>
               ))}
             </nav>
@@ -193,62 +218,75 @@ export default function SettingsLayout({ activeTab, children, className }: Setti
               <div className="relative" ref={menuRef}>
                 <button
                   onClick={() => setShowUserMenu(!showUserMenu)}
-                  className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-[11px] font-bold ring-2 ring-surface-container-lowest shadow-sm cursor-pointer hover:opacity-90 transition-all"
+                  className="w-9 h-9 rounded-full bg-gradient-to-br from-rose-600 to-rose-800 text-white flex items-center justify-center text-[11px] font-bold ring-2 ring-white shadow-sm cursor-pointer hover:opacity-90 transition-all"
                 >
-                  WX
+                  {walletAddress ? (
+                    <span className="material-symbols-outlined" style={{ fontSize: 16 }}>account_balance_wallet</span>
+                  ) : "WX"}
                 </button>
                 {showUserMenu && (
-                  <div className="absolute right-0 top-full mt-2 w-56 bg-surface-container-lowest rounded-xl shadow-xl overflow-hidden py-1 z-50">
-                    {/* User header */}
-                    <div className="flex items-center gap-3 px-4 py-3 border-b border-outline-variant/10">
-                      <div className="w-9 h-9 rounded-full bg-rose-800 text-white flex items-center justify-center text-sm font-bold">
-                        x
+                  <div className="absolute right-0 top-full mt-2 w-64 bg-surface-container-lowest rounded-xl shadow-[0px_4px_20px_rgba(0,0,0,0.04),0px_12px_40px_rgba(0,0,0,0.08)] overflow-hidden z-50">
+                    {/* Header */}
+                    <div className="p-3 bg-surface-container-low flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-full bg-gradient-to-br from-rose-600 to-rose-800 text-white flex items-center justify-center text-xs font-bold ring-2 ring-white shadow-sm">
+                        {walletAddress ? (
+                          <span className="material-symbols-outlined" style={{ fontSize: 14 }}>account_balance_wallet</span>
+                        ) : "WX"}
                       </div>
-                      <span className="font-semibold text-on-surface">Personal</span>
-                      <Link
-                        to="/settings/preferences"
-                        onClick={() => setShowUserMenu(false)}
-                        className="ml-auto text-on-surface-variant hover:text-on-surface transition-colors"
-                      >
-                        <span className="material-symbols-outlined text-xl">settings</span>
-                      </Link>
+                      <div className="flex flex-col">
+                        <span className="text-sm font-semibold text-on-surface leading-tight">
+                          {walletAddress ? displayName : t("userMenu.personal")}
+                        </span>
+                        <span className="text-[11px] text-on-surface-variant font-medium">
+                          {loginMethod === "wallet" ? t("userMenu.walletConnected") : t("userMenu.freePlan")}
+                        </span>
+                      </div>
                     </div>
                     {/* Menu items */}
-                    <div className="py-1">
+                    <div className="p-1.5 space-y-0.5">
                       {USER_MENU_ITEMS.map((item) => (
                         <Link
-                          key={item.label}
+                          key={item.labelKey}
                           to={item.href}
                           onClick={() => setShowUserMenu(false)}
-                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-on-surface hover:bg-surface-container/60 transition-colors"
+                          className="group flex items-center gap-3 px-3 py-2 text-sm text-on-surface-variant hover:bg-surface-container rounded-lg transition-colors"
                         >
-                          <span className="material-symbols-outlined text-xl text-on-surface-variant">{item.icon}</span>
-                          {item.label}
+                          <span className="material-symbols-outlined text-outline group-hover:text-primary transition-colors" style={{ fontSize: 20 }}>{item.icon}</span>
+                          {t(item.labelKey)}
                         </Link>
                       ))}
                     </div>
                     {/* Sign out */}
-                    <div className="border-t border-outline-variant/10 py-1">
+                    <div className="h-[1px] bg-surface-container-high mx-3" />
+                    <div className="p-1.5">
                       <button
-                        onClick={() => { logout(); setShowUserMenu(false); navigate("/"); }}
-                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-error hover:bg-surface-container/60 transition-colors w-full"
+                        onClick={handleLogout}
+                        className="group flex items-center gap-3 px-3 py-2 text-sm text-error/70 hover:text-error hover:bg-error/5 rounded-lg transition-colors w-full"
                       >
-                        <span className="material-symbols-outlined text-xl">logout</span>
-                        Sign Out
+                        <span className="material-symbols-outlined" style={{ fontSize: 20 }}>logout</span>
+                        <span className="font-medium">{t("common.sign_out")}</span>
                       </button>
                     </div>
                     {/* Theme switcher */}
-                    <div className="border-t border-outline-variant/10 px-3 py-2">
-                      <div className="flex items-center bg-surface-container rounded-lg p-0.5">
-                        <button className="flex-1 flex items-center justify-center py-1.5 rounded-md bg-surface-container-lowest shadow-sm text-on-surface text-xs font-medium transition-all">
-                          <span className="material-symbols-outlined text-base mr-1">light_mode</span>
-                        </button>
-                        <button className="flex-1 flex items-center justify-center py-1.5 rounded-md text-on-surface-variant text-xs font-medium hover:text-on-surface transition-all">
-                          <span className="material-symbols-outlined text-base mr-1">dark_mode</span>
-                        </button>
-                        <button className="flex-1 flex items-center justify-center py-1.5 rounded-md text-on-surface-variant text-xs font-medium hover:text-on-surface transition-all">
-                          <span className="material-symbols-outlined text-base mr-1">desktop_windows</span>
-                        </button>
+                    <div className="bg-surface-container-low p-3">
+                      <p className="text-[11px] font-bold text-on-surface-variant tracking-wider mb-2.5">{t("userMenu.systemAppearance")}</p>
+                      <div className="grid grid-cols-3 gap-1 bg-surface-container p-1 rounded-xl">
+                        {([["light", "light_mode"], ["dark", "dark_mode"], ["system", "desktop_windows"]] as const).map(([mode, icon]) => (
+                          <button
+                            key={mode}
+                            onClick={() => setTheme(mode)}
+                            className={`flex items-center justify-center py-1.5 rounded-lg transition-all ${
+                              theme === mode
+                                ? "bg-surface-container-lowest shadow-sm text-primary"
+                                : "text-on-surface-variant hover:bg-surface-container-low"
+                            }`}
+                          >
+                            <span
+                              className="material-symbols-outlined"
+                              style={{ fontSize: 18, ...(theme === mode ? { fontVariationSettings: "'FILL' 1" } : {}) }}
+                            >{icon}</span>
+                          </button>
+                        ))}
                       </div>
                     </div>
                   </div>
