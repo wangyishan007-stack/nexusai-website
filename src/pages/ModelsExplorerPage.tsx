@@ -621,7 +621,7 @@ export const ModelsExplorerPage: React.FC<ModelsExplorerPageProps> = ({
                     <span className="material-symbols-outlined text-sm text-on-surface-variant">keyboard_arrow_down</span>
                   </button>
                   {showSortMenu && (
-                    <div className="absolute right-0 top-full mt-2 w-56 bg-surface-container-lowest rounded-xl shadow-[0px_4px_20px_rgba(0,0,0,0.04),0px_12px_40px_rgba(0,0,0,0.08)] overflow-hidden z-50 py-1">
+                    <div className="absolute left-0 sm:left-auto sm:right-0 top-full mt-2 w-56 bg-surface-container-lowest rounded-xl shadow-[0px_4px_20px_rgba(0,0,0,0.04),0px_12px_40px_rgba(0,0,0,0.08)] overflow-hidden z-50 py-1">
                       {SORT_OPTIONS.map((option) => (
                         <button
                           key={option}

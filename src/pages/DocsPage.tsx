@@ -173,14 +173,14 @@ export const DocsPage: React.FC<DocsPageProps> = ({ className = "" }) => {
 
   const tabClass = (active: boolean) =>
     active
-      ? "px-6 py-3 text-sm font-bold border-b-2 border-primary text-primary"
-      : "px-6 py-3 text-sm font-medium text-on-surface-variant hover:text-on-surface cursor-pointer";
+      ? "px-3 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm font-bold border-b-2 border-primary text-primary whitespace-nowrap"
+      : "px-3 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm font-medium text-on-surface-variant hover:text-on-surface cursor-pointer whitespace-nowrap";
 
   return (
     <div className={`bg-surface font-body text-on-surface antialiased ${className}`}>
       <Navbar />
 
-      <div className="flex pt-16 min-h-screen">
+      <div className="flex pt-14 sm:pt-16 min-h-screen">
         {/* Left Sidebar */}
         <aside className="fixed left-0 top-16 h-[calc(100vh-4rem)] w-64 overflow-y-auto bg-surface-container-low border-r border-outline-variant/10 flex-col p-4 space-y-6 hidden lg:flex">
           {SIDEBAR_SECTIONS.map((section) => (
@@ -224,7 +224,7 @@ export const DocsPage: React.FC<DocsPageProps> = ({ className = "" }) => {
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 ml-0 lg:ml-64 mr-0 xl:mr-72 bg-surface-container-lowest min-h-screen px-6 py-12 md:px-12 lg:px-20">
+        <main className="flex-1 ml-0 lg:ml-64 mr-0 xl:mr-72 bg-surface-container-lowest min-h-screen px-4 sm:px-6 py-8 sm:py-12 md:px-12 lg:px-20">
           <div className="max-w-4xl mx-auto">
             {/* Breadcrumb */}
             <nav className="flex items-center gap-2 text-xs font-medium text-on-surface-variant mb-6">
@@ -236,17 +236,17 @@ export const DocsPage: React.FC<DocsPageProps> = ({ className = "" }) => {
             </nav>
 
             <h1
-              className="text-4xl md:text-5xl font-extrabold font-headline tracking-tight text-on-background mb-6"
+              className="text-2xl sm:text-4xl md:text-5xl font-extrabold font-headline tracking-tight text-on-background mb-4 sm:mb-6"
               id="quickstart"
             >
               {t("docs.sidebar_quickstart")}
             </h1>
-            <p className="text-lg text-on-surface-variant leading-relaxed mb-10">
+            <p className="text-sm sm:text-lg text-on-surface-variant leading-relaxed mb-6 sm:mb-10">
               {t("docs.quickstart_desc")}
             </p>
 
             {/* Callout */}
-            <div className="bg-secondary-container/10 border-l-4 border-secondary p-6 rounded-r-xl mb-12">
+            <div className="bg-secondary-container/10 border-l-4 border-secondary p-4 sm:p-6 rounded-r-xl mb-8 sm:mb-12">
               <div className="flex gap-4">
                 <span
                   className="material-symbols-outlined text-secondary"
@@ -264,7 +264,7 @@ export const DocsPage: React.FC<DocsPageProps> = ({ className = "" }) => {
             </div>
 
             {/* Bento Grid Links */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-16">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 mb-10 sm:mb-16">
               {BENTO_LINKS.map((link) => (
                 <button
                   key={link.titleKey}
@@ -286,7 +286,7 @@ export const DocsPage: React.FC<DocsPageProps> = ({ className = "" }) => {
             </div>
 
             {/* Step 1 */}
-            <section className="mb-16" id="step-1">
+            <section className="mb-10 sm:mb-16" id="step-1">
               <h2 className="text-2xl font-bold font-headline mb-4">
                 {t("docs.step_1_title")}
               </h2>
@@ -317,7 +317,7 @@ export const DocsPage: React.FC<DocsPageProps> = ({ className = "" }) => {
             </section>
 
             {/* Step 2 */}
-            <section className="mb-16" id="step-2">
+            <section className="mb-10 sm:mb-16" id="step-2">
               <h2 className="text-2xl font-bold font-headline mb-4">
                 {t("docs.step_2_title")}
               </h2>
@@ -350,7 +350,7 @@ export const DocsPage: React.FC<DocsPageProps> = ({ className = "" }) => {
             </section>
 
             {/* Step 3 */}
-            <section className="mb-16" id="step-3">
+            <section className="mb-10 sm:mb-16" id="step-3">
               <h2 className="text-2xl font-bold font-headline mb-4">
                 {t("docs.step_3_title")}
               </h2>
@@ -358,7 +358,7 @@ export const DocsPage: React.FC<DocsPageProps> = ({ className = "" }) => {
                 {t("docs.step_3_desc")}
               </p>
               <div className="bg-surface-container-low rounded-xl overflow-hidden">
-                <div className="flex border-b border-outline-variant/10 justify-between items-center pr-4">
+                <div className="flex flex-wrap border-b border-outline-variant/10 items-center">
                   <div className="flex">
                     {(["python", "typescript", "curl"] as CodeTab[]).map((tab) => (
                       <button key={tab} onClick={() => setRequestTab(tab)} className={tabClass(requestTab === tab)}>
@@ -366,8 +366,8 @@ export const DocsPage: React.FC<DocsPageProps> = ({ className = "" }) => {
                       </button>
                     ))}
                   </div>
-                  <div className="flex items-center gap-4">
-                    <span className="text-[10px] uppercase font-bold text-on-surface-variant tracking-widest">
+                  <div className="flex items-center gap-2 sm:gap-4 ml-auto pr-3 sm:pr-4">
+                    <span className="hidden sm:inline text-[10px] uppercase font-bold text-on-surface-variant tracking-widest">
                       {REQUEST_FILENAME[requestTab]}
                     </span>
                     <button
@@ -381,7 +381,7 @@ export const DocsPage: React.FC<DocsPageProps> = ({ className = "" }) => {
                     </button>
                   </div>
                 </div>
-                <div className="p-6 bg-surface-container-highest font-mono text-sm text-on-surface leading-relaxed overflow-x-auto">
+                <div className="p-4 sm:p-6 bg-surface-container-highest font-mono text-xs sm:text-sm text-on-surface leading-relaxed overflow-x-auto">
                   <pre><code>{REQUEST_CODE[requestTab]}</code></pre>
                 </div>
               </div>
@@ -402,7 +402,7 @@ export const DocsPage: React.FC<DocsPageProps> = ({ className = "" }) => {
             </section>
 
             {/* Step 4 */}
-            <section className="mb-16" id="step-4">
+            <section className="mb-10 sm:mb-16" id="step-4">
               <h2 className="text-2xl font-bold font-headline mb-4">
                 {t("docs.step_4_title")}
               </h2>
@@ -422,7 +422,7 @@ export const DocsPage: React.FC<DocsPageProps> = ({ className = "" }) => {
                     {copiedId === "response" ? t("docs.copied") : t("docs.copy")}
                   </button>
                 </div>
-                <div className="p-6 font-mono text-xs text-on-surface">
+                <div className="p-4 sm:p-6 font-mono text-[10px] sm:text-xs text-on-surface overflow-x-auto">
                   <pre><code>{RESPONSE_JSON}</code></pre>
                 </div>
               </div>
@@ -434,20 +434,20 @@ export const DocsPage: React.FC<DocsPageProps> = ({ className = "" }) => {
                 {t("docs.toc_key_parameters")}
               </h2>
               <div className="overflow-x-auto rounded-xl bg-surface-container-low">
-                <table className="w-full text-left text-sm">
+                <table className="w-full text-left text-xs sm:text-sm">
                   <thead className="text-on-surface font-bold">
                     <tr className="border-b border-outline-variant/10">
-                      <th className="px-6 py-4">{t("docs.col_parameter")}</th>
-                      <th className="px-6 py-4">{t("docs.col_type")}</th>
-                      <th className="px-6 py-4">{t("docs.col_description")}</th>
+                      <th className="px-3 sm:px-6 py-3 sm:py-4">{t("docs.col_parameter")}</th>
+                      <th className="px-3 sm:px-6 py-3 sm:py-4">{t("docs.col_type")}</th>
+                      <th className="px-3 sm:px-6 py-3 sm:py-4">{t("docs.col_description")}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-outline-variant/10">
                     {PARAMETERS_TABLE.map((row) => (
                       <tr key={row.param} className="hover:bg-surface-container/40 transition-colors">
-                        <td className="px-6 py-4 font-mono text-primary">{row.param}</td>
-                        <td className="px-6 py-4 text-on-surface-variant">{row.type}</td>
-                        <td className="px-6 py-4 text-on-surface-variant">{row.desc}</td>
+                        <td className="px-3 sm:px-6 py-3 sm:py-4 font-mono text-primary">{row.param}</td>
+                        <td className="px-3 sm:px-6 py-3 sm:py-4 text-on-surface-variant">{row.type}</td>
+                        <td className="px-3 sm:px-6 py-3 sm:py-4 text-on-surface-variant">{row.desc}</td>
                       </tr>
                     ))}
                   </tbody>
