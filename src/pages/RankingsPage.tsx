@@ -210,7 +210,7 @@ export const RankingsPage: React.FC<RankingsPageProps> = ({ className = "" }) =>
         </section>
 
         {/* Top Models Stacked Bar Chart */}
-        <section className="bg-surface-container-lowest rounded-xl border border-outline-variant/10 shadow-sm p-4 sm:p-8 space-y-4">
+        <section className="bg-surface-container-lowest rounded-xl border border-outline-variant/10 shadow-sm p-4 sm:p-8 space-y-4 overflow-hidden">
           <div className="flex items-center gap-3">
             <span
               className="material-symbols-outlined text-on-surface-variant"
@@ -226,11 +226,11 @@ export const RankingsPage: React.FC<RankingsPageProps> = ({ className = "" }) =>
 
           <div className="flex mt-4">
             {/* Y-axis labels */}
-            <div className="flex flex-col justify-between text-xs text-on-surface-variant font-medium pr-3 py-1 shrink-0 w-12 text-right">
+            <div className="flex flex-col justify-between text-[10px] sm:text-xs text-on-surface-variant font-medium pr-2 sm:pr-3 py-1 shrink-0 w-8 sm:w-12 text-right">
               <span>{Math.round(MAX_WEEKLY_TOTAL / 1000)}T</span>
-              <span>{Math.round((MAX_WEEKLY_TOTAL * 0.75) / 1000)}T</span>
+              <span className="hidden sm:block">{Math.round((MAX_WEEKLY_TOTAL * 0.75) / 1000)}T</span>
               <span>{Math.round((MAX_WEEKLY_TOTAL * 0.5) / 1000)}T</span>
-              <span>{Math.round((MAX_WEEKLY_TOTAL * 0.25) / 1000)}T</span>
+              <span className="hidden sm:block">{Math.round((MAX_WEEKLY_TOTAL * 0.25) / 1000)}T</span>
               <span>0</span>
             </div>
 
@@ -266,8 +266,8 @@ export const RankingsPage: React.FC<RankingsPageProps> = ({ className = "" }) =>
                           />
                         );
                       })}
-                      {/* Tooltip popover */}
-                      <div className="absolute top-0 left-1/2 -translate-x-1/2 hidden group-hover:block z-20 pointer-events-none">
+                      {/* Tooltip popover - hidden on mobile */}
+                      <div className="absolute top-0 left-1/2 -translate-x-1/2 hidden md:group-hover:block z-20 pointer-events-none">
                         <div className="bg-surface-container-lowest rounded-xl shadow-xl border border-outline-variant/20 py-3 w-56">
                           {/* Date badge */}
                           <div className="px-4 pb-2.5 mb-1 border-b border-outline-variant/15">
@@ -306,8 +306,8 @@ export const RankingsPage: React.FC<RankingsPageProps> = ({ className = "" }) =>
 
               {/* X-axis labels */}
               <div className="flex justify-between mt-2 text-[10px] text-on-surface-variant">
-                {WEEKLY_DATA.filter((_, i) => i % 8 === 0).map((week) => (
-                  <span key={week.date}>{week.date}</span>
+                {WEEKLY_DATA.filter((_, i) => i % 13 === 0).map((week) => (
+                  <span key={week.date} className="truncate">{week.date}</span>
                 ))}
               </div>
             </div>
@@ -325,7 +325,7 @@ export const RankingsPage: React.FC<RankingsPageProps> = ({ className = "" }) =>
         </section>
 
         {/* Market Share - 100% Stacked Bar Chart */}
-        <section className="bg-surface-container-lowest rounded-xl border border-outline-variant/10 shadow-sm p-4 sm:p-8 space-y-4">
+        <section className="bg-surface-container-lowest rounded-xl border border-outline-variant/10 shadow-sm p-4 sm:p-8 space-y-4 overflow-hidden">
           <div className="flex items-center gap-3">
             <span
               className="material-symbols-outlined text-on-surface-variant"
@@ -341,10 +341,11 @@ export const RankingsPage: React.FC<RankingsPageProps> = ({ className = "" }) =>
 
           <div className="flex mt-4">
             {/* Y-axis */}
-            <div className="flex flex-col justify-between text-xs text-on-surface-variant font-medium pr-3 py-1 shrink-0 w-12 text-right">
+            <div className="flex flex-col justify-between text-[10px] sm:text-xs text-on-surface-variant font-medium pr-2 sm:pr-3 py-1 shrink-0 w-8 sm:w-12 text-right">
               <span>100%</span>
-              <span>60%</span>
-              <span>30%</span>
+              <span className="hidden sm:block">60%</span>
+              <span>50%</span>
+              <span className="hidden sm:block">30%</span>
               <span>0%</span>
             </div>
 
@@ -374,8 +375,8 @@ export const RankingsPage: React.FC<RankingsPageProps> = ({ className = "" }) =>
                         className="min-h-0 transition-opacity group-hover:opacity-80"
                       />
                     ))}
-                    {/* Tooltip */}
-                    <div className="absolute top-0 left-1/2 -translate-x-1/2 hidden group-hover:block z-20 pointer-events-none">
+                    {/* Tooltip - hidden on mobile */}
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 hidden md:group-hover:block z-20 pointer-events-none">
                       <div className="bg-surface-container-lowest rounded-xl shadow-xl border border-outline-variant/20 py-3 w-52">
                         <div className="px-4 pb-2.5 mb-1 border-b border-outline-variant/15">
                           <span className="inline-block text-xs font-semibold text-on-surface bg-surface-container-low px-2.5 py-1 rounded-full">
@@ -405,8 +406,8 @@ export const RankingsPage: React.FC<RankingsPageProps> = ({ className = "" }) =>
 
               {/* X-axis */}
               <div className="flex justify-between mt-2 text-[10px] text-on-surface-variant">
-                {MARKET_SHARE_WEEKLY.filter((_, i) => i % 8 === 0).map((week) => (
-                  <span key={week.date}>{week.date}</span>
+                {MARKET_SHARE_WEEKLY.filter((_, i) => i % 13 === 0).map((week) => (
+                  <span key={week.date} className="truncate">{week.date}</span>
                 ))}
               </div>
             </div>
@@ -503,7 +504,7 @@ export const RankingsPage: React.FC<RankingsPageProps> = ({ className = "" }) =>
         </section>
 
         {/* Market Share */}
-        <section className="bg-surface-container-low rounded-xl p-4 sm:p-8 space-y-6 sm:space-y-8">
+        <section className="bg-surface-container-low rounded-xl p-4 sm:p-8 space-y-6 sm:space-y-8 overflow-hidden">
           <div className="space-y-2">
             <h2 className="text-xl sm:text-2xl font-headline font-bold">{t("rankings.provider_market_share")}</h2>
             <p className="text-on-surface-variant">
