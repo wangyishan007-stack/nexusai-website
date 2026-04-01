@@ -173,9 +173,9 @@ export const RankingsPage: React.FC<RankingsPageProps> = ({ className = "" }) =>
     <div className={`bg-background text-on-background ${className}`}>
       <Navbar />
 
-      <main className="max-w-7xl mx-auto px-6 py-12 space-y-16 pt-28">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-10 sm:space-y-16 pt-24 sm:pt-28">
         {/* Hero Section */}
-        <section className="text-center space-y-6 py-8">
+        <section className="text-center space-y-4 sm:space-y-6 py-4 sm:py-8">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-secondary-container/20 text-primary text-xs font-bold uppercase tracking-widest">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
@@ -183,10 +183,10 @@ export const RankingsPage: React.FC<RankingsPageProps> = ({ className = "" }) =>
             </span>
             {t("rankings.badge")}
           </div>
-          <h1 className="text-5xl md:text-6xl font-headline font-extrabold tracking-tight text-on-background">
+          <h1 className="text-3xl sm:text-5xl md:text-6xl font-headline font-extrabold tracking-tight text-on-background">
             {t("rankings.title")}
           </h1>
-          <p className="text-xl text-on-surface-variant max-w-2xl mx-auto font-body leading-relaxed">
+          <p className="text-base sm:text-xl text-on-surface-variant max-w-2xl mx-auto font-body leading-relaxed">
             {t("rankings.subtitle", "Based on real usage data from millions of API requests through NexusAI.")}
           </p>
         </section>
@@ -194,11 +194,11 @@ export const RankingsPage: React.FC<RankingsPageProps> = ({ className = "" }) =>
         {/* Stats Grid */}
         <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {STATS.map((stat) => (
-            <div key={stat.labelKey} className="bg-surface-container-low p-8 rounded-xl space-y-2">
-              <span className="text-on-surface-variant text-sm font-medium tracking-wide uppercase">
+            <div key={stat.labelKey} className="bg-surface-container-low p-5 sm:p-8 rounded-xl space-y-2">
+              <span className="text-on-surface-variant text-xs sm:text-sm font-medium tracking-wide uppercase">
                 {t(stat.labelKey)}
               </span>
-              <div className={`text-4xl font-headline font-bold ${stat.color}`}>{stat.value}</div>
+              <div className={`text-2xl sm:text-4xl font-headline font-bold ${stat.color}`}>{stat.value}</div>
               <div className={`flex items-center text-xs ${stat.subColor} font-bold`}>
                 {stat.subIcon && (
                   <span className="material-symbols-outlined text-sm">{stat.subIcon}</span>
@@ -210,7 +210,7 @@ export const RankingsPage: React.FC<RankingsPageProps> = ({ className = "" }) =>
         </section>
 
         {/* Top Models Stacked Bar Chart */}
-        <section className="bg-surface-container-lowest rounded-xl border border-outline-variant/10 shadow-sm p-8 space-y-4">
+        <section className="bg-surface-container-lowest rounded-xl border border-outline-variant/10 shadow-sm p-4 sm:p-8 space-y-4">
           <div className="flex items-center gap-3">
             <span
               className="material-symbols-outlined text-on-surface-variant"
@@ -244,7 +244,7 @@ export const RankingsPage: React.FC<RankingsPageProps> = ({ className = "" }) =>
               </div>
 
               {/* Bars */}
-              <div className="flex items-end gap-[2px] h-[360px] relative z-10">
+              <div className="flex items-end gap-[2px] h-[220px] sm:h-[360px] relative z-10">
                 {WEEKLY_DATA.map((week) => {
                   const total = week.segments.reduce((s, seg) => s + seg.value, 0);
                   return (
@@ -325,7 +325,7 @@ export const RankingsPage: React.FC<RankingsPageProps> = ({ className = "" }) =>
         </section>
 
         {/* Market Share - 100% Stacked Bar Chart */}
-        <section className="bg-surface-container-lowest rounded-xl border border-outline-variant/10 shadow-sm p-8 space-y-4">
+        <section className="bg-surface-container-lowest rounded-xl border border-outline-variant/10 shadow-sm p-4 sm:p-8 space-y-4">
           <div className="flex items-center gap-3">
             <span
               className="material-symbols-outlined text-on-surface-variant"
@@ -358,7 +358,7 @@ export const RankingsPage: React.FC<RankingsPageProps> = ({ className = "" }) =>
               </div>
 
               {/* Bars - each bar fills 100% height, segments are proportional */}
-              <div className="flex gap-[1px] h-[360px] relative z-10">
+              <div className="flex gap-[1px] h-[220px] sm:h-[360px] relative z-10">
                 {MARKET_SHARE_WEEKLY.map((week) => (
                   <div
                     key={week.date}
@@ -413,7 +413,7 @@ export const RankingsPage: React.FC<RankingsPageProps> = ({ className = "" }) =>
           </div>
 
           {/* Provider ranking legend - 2 columns */}
-          <div className="grid grid-cols-2 gap-x-8 gap-y-4 pt-6 border-t border-outline-variant/15">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 sm:gap-y-4 pt-6 border-t border-outline-variant/15">
             {PROVIDER_RANKINGS.map((p) => (
               <div key={p.name} className="flex items-center gap-3">
                 <span className="text-sm text-on-surface-variant w-6 text-right">{p.rank}.</span>
@@ -433,19 +433,14 @@ export const RankingsPage: React.FC<RankingsPageProps> = ({ className = "" }) =>
 
         {/* Top Models Table */}
         <section className="space-y-8">
-          <div className="flex justify-between items-end">
-            <div className="space-y-2">
-              <h2 className="text-3xl font-headline font-bold">{t("rankings.trending_models")}</h2>
-              <p className="text-on-surface-variant">
-                {t("rankings.trending_desc", "Global volume and growth trends for the last 24 hours.")}
-              </p>
-            </div>
-            <button className="flex items-center gap-2 text-primary font-bold hover:gap-3 transition-all">
-              {t("rankings.view_full_leaderboard")}{" "}
-              <span className="material-symbols-outlined">arrow_forward</span>
-            </button>
+          <div className="space-y-2">
+            <h2 className="text-2xl sm:text-3xl font-headline font-bold">{t("rankings.trending_models")}</h2>
+            <p className="text-on-surface-variant text-sm sm:text-base">
+              {t("rankings.trending_desc", "Global volume and growth trends for the last 24 hours.")}
+            </p>
           </div>
-          <div className="overflow-hidden bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/10">
+          {/* Desktop Table */}
+          <div className="hidden md:block overflow-hidden bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/10">
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-surface-container border-b border-outline-variant/30 text-on-surface-variant font-label text-xs uppercase tracking-widest">
@@ -480,12 +475,37 @@ export const RankingsPage: React.FC<RankingsPageProps> = ({ className = "" }) =>
               </tbody>
             </table>
           </div>
+
+          {/* Mobile Cards */}
+          <div className="md:hidden space-y-3">
+            {TRENDING_MODELS.map((model) => (
+              <div key={model.rank} className="bg-surface-container-lowest rounded-xl border border-outline-variant/10 p-4">
+                <div className="flex items-center gap-3 mb-3">
+                  <span className={`text-lg font-bold ${model.rankColor}`}>{model.rank}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold truncate">{model.name}</p>
+                    <p className="text-xs text-on-surface-variant">{model.provider}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-medium">{model.tokens}</p>
+                    <p className={`text-xs font-bold ${model.changeColor}`}>{model.change}</p>
+                  </div>
+                </div>
+                <div className="w-full bg-surface-container-high h-1.5 rounded-full overflow-hidden">
+                  <div
+                    className={`bg-primary h-full rounded-full ${model.opacity}`}
+                    style={{ width: model.width }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
         </section>
 
         {/* Market Share */}
-        <section className="bg-surface-container-low rounded-xl p-8 space-y-8">
+        <section className="bg-surface-container-low rounded-xl p-4 sm:p-8 space-y-6 sm:space-y-8">
           <div className="space-y-2">
-            <h2 className="text-2xl font-headline font-bold">{t("rankings.provider_market_share")}</h2>
+            <h2 className="text-xl sm:text-2xl font-headline font-bold">{t("rankings.provider_market_share")}</h2>
             <p className="text-on-surface-variant">
               {t("rankings.provider_market_share_desc", "Token volume distribution by organizational group.")}
             </p>
@@ -520,7 +540,7 @@ export const RankingsPage: React.FC<RankingsPageProps> = ({ className = "" }) =>
 
         {/* Categories Grid */}
         <section className="space-y-8">
-          <h2 className="text-3xl font-headline font-bold">{t("rankings.performance_by_category")}</h2>
+          <h2 className="text-2xl sm:text-3xl font-headline font-bold">{t("rankings.performance_by_category")}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {CATEGORIES.map((cat) => (
               <div
@@ -550,12 +570,12 @@ export const RankingsPage: React.FC<RankingsPageProps> = ({ className = "" }) =>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Natural Languages */}
           <section className="space-y-6">
-            <h3 className="text-2xl font-headline font-bold">{t("rankings.natural_languages")}</h3>
-            <div className="flex border-b border-outline-variant/30 gap-6">
+            <h3 className="text-xl sm:text-2xl font-headline font-bold">{t("rankings.natural_languages")}</h3>
+            <div className="flex border-b border-outline-variant/30 gap-4 sm:gap-6 overflow-x-auto">
               {NAT_LANGUAGES.map((lang, i) => (
                 <button
                   key={lang}
-                  className={`pb-3 ${
+                  className={`pb-3 whitespace-nowrap text-sm sm:text-base ${
                     activeNatLang === i
                       ? "border-b-2 border-primary text-primary font-bold"
                       : "text-on-surface-variant hover:text-on-surface transition-colors"
@@ -581,12 +601,12 @@ export const RankingsPage: React.FC<RankingsPageProps> = ({ className = "" }) =>
 
           {/* Programming Languages */}
           <section className="space-y-6">
-            <h3 className="text-2xl font-headline font-bold">{t("rankings.programming_languages")}</h3>
-            <div className="flex border-b border-outline-variant/30 gap-6">
+            <h3 className="text-xl sm:text-2xl font-headline font-bold">{t("rankings.programming_languages")}</h3>
+            <div className="flex border-b border-outline-variant/30 gap-4 sm:gap-6 overflow-x-auto">
               {PROG_LANGUAGES.map((lang, i) => (
                 <button
                   key={lang}
-                  className={`pb-3 ${
+                  className={`pb-3 whitespace-nowrap text-sm sm:text-base ${
                     activeProgLang === i
                       ? "border-b-2 border-primary text-primary font-bold"
                       : "text-on-surface-variant hover:text-on-surface transition-colors"
