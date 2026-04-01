@@ -273,7 +273,7 @@ export const ModelsExplorerPage: React.FC<ModelsExplorerPageProps> = ({
   className = "",
   defaultFiltersExpanded = false,
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE);
   const [sortBy, setSortBy] = useState<string>("Newest");
@@ -296,7 +296,7 @@ export const ModelsExplorerPage: React.FC<ModelsExplorerPageProps> = ({
   });
   const { pathname } = useLocation();
   const navigate = useNavigate();
-  const { isLoggedIn, login, logout } = useAuth();
+  const { isLoggedIn, login, logout, walletAddress, loginMethod, displayName } = useAuth();
   const [showLogin, setShowLogin] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -375,55 +375,106 @@ export const ModelsExplorerPage: React.FC<ModelsExplorerPageProps> = ({
             <div className="relative" ref={menuRef}>
               <button
                 onClick={() => setShowUserMenu(!showUserMenu)}
-                className="w-9 h-9 rounded-full bg-rose-800 text-white flex items-center justify-center text-sm font-bold hover:opacity-90 transition-all"
+                className="w-9 h-9 rounded-full bg-gradient-to-br from-rose-600 to-rose-800 text-white flex items-center justify-center text-[11px] font-bold ring-2 ring-white shadow-sm hover:opacity-90 transition-all"
               >
-                x
+                {walletAddress ? (
+                  <span className="material-symbols-outlined" style={{ fontSize: 16 }}>account_balance_wallet</span>
+                ) : "WX"}
               </button>
               {showUserMenu && (
-                <div className="absolute right-0 top-full mt-2 w-56 bg-surface-container-lowest rounded-xl shadow-xl overflow-hidden py-1 z-[100]">
-                  <div className="flex items-center gap-3 px-4 py-3 border-b border-outline-variant/10">
-                    <div className="w-9 h-9 rounded-full bg-rose-800 text-white flex items-center justify-center text-sm font-bold">x</div>
-                    <span className="font-semibold text-on-surface">{t("userMenu.personal")}</span>
-                    <Link to="/settings/preferences" onClick={() => setShowUserMenu(false)} className="ml-auto text-on-surface-variant hover:text-on-surface transition-colors">
-                      <span className="material-symbols-outlined text-xl">settings</span>
-                    </Link>
+                <div className="absolute right-0 top-full mt-2 w-64 bg-surface-container-lowest rounded-xl shadow-[0px_4px_20px_rgba(0,0,0,0.04),0px_12px_40px_rgba(0,0,0,0.08)] overflow-hidden z-[100]">
+                  <div className="p-3 bg-surface-container-low flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-rose-600 to-rose-800 text-white flex items-center justify-center text-xs font-bold ring-2 ring-white shadow-sm">
+                      {walletAddress ? (
+                        <span className="material-symbols-outlined" style={{ fontSize: 14 }}>account_balance_wallet</span>
+                      ) : "WX"}
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-sm font-semibold text-on-surface leading-tight">
+                        {walletAddress ? displayName : t("userMenu.personal")}
+                      </span>
+                      <span className="text-[11px] text-on-surface-variant font-medium">
+                        {loginMethod === "wallet" ? t("userMenu.walletConnected") : t("userMenu.freePlan")}
+                      </span>
+                    </div>
                   </div>
-                  <div className="py-1">
+                  <div className="p-1.5 space-y-0.5">
                     {[
                       { icon: "bar_chart", labelKey: "userMenu.activity", href: "/settings/activity" },
                       { icon: "format_list_bulleted", labelKey: "userMenu.logs", href: "/settings/logs" },
                       { icon: "credit_card", labelKey: "userMenu.credits", href: "/settings/credits" },
                       { icon: "settings", labelKey: "userMenu.settings", href: "/settings/preferences" },
                     ].map((item) => (
-                      <Link key={item.labelKey} to={item.href} onClick={() => setShowUserMenu(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-on-surface hover:bg-surface-container/60 transition-colors">
-                        <span className="material-symbols-outlined text-xl text-on-surface-variant">{item.icon}</span>
+                      <Link key={item.labelKey} to={item.href} onClick={() => setShowUserMenu(false)} className="group flex items-center gap-3 px-3 py-2 text-sm text-on-surface-variant hover:bg-surface-container rounded-lg transition-colors">
+                        <span className="material-symbols-outlined text-outline group-hover:text-primary transition-colors" style={{ fontSize: 20 }}>{item.icon}</span>
                         {t(item.labelKey)}
                       </Link>
                     ))}
                   </div>
-                  <div className="border-t border-outline-variant/10 py-1">
-                    <button onClick={() => { logout(); setShowUserMenu(false); }} className="flex items-center gap-3 px-4 py-2.5 text-sm text-error hover:bg-surface-container/60 transition-colors w-full">
-                      <span className="material-symbols-outlined text-xl">logout</span>
-                      {t("modelsExplorer.sign_out")}
+                  <div className="h-[1px] bg-surface-container-high mx-3" />
+                  <div className="p-1.5">
+                    <button onClick={() => { logout(); setShowUserMenu(false); }} className="group flex items-center gap-3 px-3 py-2 text-sm text-error/70 hover:text-error hover:bg-error/5 rounded-lg transition-colors w-full">
+                      <span className="material-symbols-outlined" style={{ fontSize: 20 }}>logout</span>
+                      <span className="font-medium">{t("common.sign_out")}</span>
                     </button>
                   </div>
-                  <div className="border-t border-outline-variant/10 px-3 py-2">
-                    <div className="flex items-center bg-surface-container rounded-lg p-0.5">
-                      <button className="flex-1 flex items-center justify-center py-1.5 rounded-md bg-surface-container-lowest shadow-sm text-on-surface text-xs font-medium transition-all"><span className="material-symbols-outlined text-base mr-1">light_mode</span></button>
-                      <button className="flex-1 flex items-center justify-center py-1.5 rounded-md text-on-surface-variant text-xs font-medium hover:text-on-surface transition-all"><span className="material-symbols-outlined text-base mr-1">dark_mode</span></button>
-                      <button className="flex-1 flex items-center justify-center py-1.5 rounded-md text-on-surface-variant text-xs font-medium hover:text-on-surface transition-all"><span className="material-symbols-outlined text-base mr-1">desktop_windows</span></button>
+                  <div className="bg-surface-container-low p-3 space-y-3">
+                    <div>
+                      <p className="text-[11px] font-bold text-on-surface-variant tracking-wider mb-2.5">{t("userMenu.systemAppearance")}</p>
+                      <div className="grid grid-cols-3 gap-1 bg-surface-container p-1 rounded-xl">
+                        {([["light", "light_mode"], ["dark", "dark_mode"], ["system", "desktop_windows"]] as const).map(([mode, icon]) => (
+                          <button
+                            key={mode}
+                            onClick={() => setTheme(mode)}
+                            className={`flex items-center justify-center py-1.5 rounded-lg transition-all ${
+                              theme === mode
+                                ? "bg-surface-container-lowest shadow-sm text-primary"
+                                : "text-on-surface-variant hover:bg-surface-container-low"
+                            }`}
+                          >
+                            <span
+                              className="material-symbols-outlined"
+                              style={{ fontSize: 18, ...(theme === mode ? { fontVariationSettings: "'FILL' 1" } : {}) }}
+                            >{icon}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-[11px] font-bold text-on-surface-variant tracking-wider mb-2.5">{t("userMenu.language")}</p>
+                      <div className="grid grid-cols-2 gap-1 bg-surface-container p-1 rounded-xl">
+                        {([["en", "English"], ["zh", "中文"]] as const).map(([lng, label]) => (
+                          <button
+                            key={lng}
+                            onClick={() => i18n.changeLanguage(lng)}
+                            className={`flex items-center justify-center py-1.5 rounded-lg text-xs font-medium transition-all ${
+                              i18n.language.startsWith(lng)
+                                ? "bg-surface-container-lowest shadow-sm text-primary"
+                                : "text-on-surface-variant hover:bg-surface-container-low"
+                            }`}
+                          >
+                            {label}
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </div>
               )}
             </div>
           ) : (
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => i18n.changeLanguage(i18n.language.startsWith("zh") ? "en" : "zh")}
+                className="text-on-surface-variant hover:text-on-surface transition-colors text-sm font-medium"
+              >
+                {i18n.language.startsWith("zh") ? "EN" : "中文"}
+              </button>
               <button onClick={() => setShowLogin(true)} className="text-on-surface-variant hover:text-on-surface transition-colors text-sm font-medium">
-                {t("modelsExplorer.sign_in")}
+                {t("common.sign_in")}
               </button>
               <Link to="/settings/api-keys" className="bg-primary-container text-on-primary px-5 py-2.5 rounded-lg text-sm font-semibold hover:opacity-90 active:scale-95 duration-150 transition-all">
-                {t("modelsExplorer.get_api_key")}
+                {t("common.get_api_key")}
               </Link>
             </div>
           )}
